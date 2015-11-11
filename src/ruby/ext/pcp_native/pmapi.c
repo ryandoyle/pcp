@@ -821,6 +821,20 @@ static VALUE rb_pmGetArchiveLabel(VALUE self) {
     return result;
 }
 
+static VALUE rb_pmGetArchiveEnd(VALUE self) {
+    int error;
+    struct timeval time;
+
+    use_context(self);
+
+    if((error = pmGetArchiveEnd(&time)) < 0) {
+        raise_error_from_pmapi_error_code(error);
+        return Qnil;
+    }
+
+    return rb_time_new(time.tv_sec, time.tv_usec);
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -999,6 +1013,7 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmFetch", rb_pmFetch, 1);
     rb_define_method(pcp_pmapi_class, "pmFetchArchive", rb_pmFetchArchive, 0);
     rb_define_method(pcp_pmapi_class, "pmGetArchiveLabel", rb_pmGetArchiveLabel, 0);
+    rb_define_method(pcp_pmapi_class, "pmGetArchiveEnd", rb_pmGetArchiveEnd, 0);
 
 }
 

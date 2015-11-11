@@ -504,6 +504,15 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmGetArchiveEnd' do
+      it 'should return the time that the archive ends' do
+        expect(pmapi_archive.pmGetArchiveEnd).to be_kind_of(Time)
+      end
+      it 'raises an error if not used in the correct context' do
+        expect{pmapi.pmGetArchiveLabel}.to raise_error PCP::PMAPI::NoContextError
+      end
+    end
+
   end
 
 end
