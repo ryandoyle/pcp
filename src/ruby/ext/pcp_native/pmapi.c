@@ -835,6 +835,57 @@ static VALUE rb_pmGetArchiveEnd(VALUE self) {
     return rb_time_new(time.tv_sec, time.tv_usec);
 }
 
+/* call-seq: pmapi.pmFreeResult
+ *
+ * Not implemented. Lifecycle of pmResult is controlled by Ruby.
+ *
+ * Raises a NotImplementedError if called.
+ *
+ */
+static VALUE rb_pmFreeResult() {
+    rb_raise(rb_eNotImpError, "pmFreeResult not supported");
+    return Qnil;
+}
+
+/* call-seq: pmapi.pmFreeHighResResult
+ *
+ * Not implemented. Lifecycle of pmHighResResult is controlled by Ruby.
+ *
+ * Raises a NotImplementedError if called.
+ *
+ */
+static VALUE rb_pmFreeHighResResult() {
+    rb_raise(rb_eNotImpError, "pmFreeHighResResult not supported");
+    return Qnil;
+}
+
+/* call-seq: pmapi.pmExtractValue
+ *
+ * Not implemented. Values contained in pmResult are returned already converted when
+ * returned to the caller.
+ *
+ * Raises a NotImplementedError if called.
+ *
+ */
+static VALUE rb_pmExtractValue() {
+    rb_raise(rb_eNotImpError, "pmExtractValue not supported");
+    return Qnil;
+}
+
+/* call-seq: pmapi.pmPrintValue
+ *
+ * Not implemented. Methods that return a pmResult already do the type conversion required
+ * to easily print results in Ruby code.
+ *
+ * Raises a NotImplementedError if called.
+ *
+ */
+static VALUE rb_pmPrintValue() {
+    rb_raise(rb_eNotImpError, "pmPrintValue not supported");
+    return Qnil;
+}
+
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1014,6 +1065,10 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmFetchArchive", rb_pmFetchArchive, 0);
     rb_define_method(pcp_pmapi_class, "pmGetArchiveLabel", rb_pmGetArchiveLabel, 0);
     rb_define_method(pcp_pmapi_class, "pmGetArchiveEnd", rb_pmGetArchiveEnd, 0);
+    rb_define_method(pcp_pmapi_class, "pmFreeResult", rb_pmFreeResult, 0);
+    rb_define_method(pcp_pmapi_class, "pmFreeHighResResult", rb_pmFreeHighResResult, 0);
+    rb_define_method(pcp_pmapi_class, "pmExtractValue", rb_pmExtractValue, 0);
+    rb_define_method(pcp_pmapi_class, "pmPrintValue", rb_pmPrintValue, 0);
 
 }
 

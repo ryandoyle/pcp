@@ -513,6 +513,30 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmFreeResult' do
+      it 'should raise an error because it is not implemented' do
+        expect{pmapi.pmFreeResult}.to raise_error NotImplementedError
+      end
+    end
+
+    describe '#pmFreeHighResResult' do
+      it 'should raise an error because it is not implemented' do
+        expect{pmapi.pmFreeHighResResult}.to raise_error NotImplementedError
+      end
+    end
+
+    describe '#pmExtractValue' do
+      it 'should raise an error because it is not implemented' do
+        expect{pmapi.pmExtractValue}.to raise_error NotImplementedError
+      end
+    end
+
+    describe '#pmPrintValue' do
+      it 'should raise an error because it is not implemented' do
+        expect{pmapi.pmPrintValue}.to raise_error NotImplementedError
+      end
+    end
+
   end
 
 end
