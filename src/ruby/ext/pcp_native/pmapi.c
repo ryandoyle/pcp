@@ -15,6 +15,8 @@
 #include <ruby.h>
 #include <pcp/pmapi.h>
 
+#include "pmapi_pmunits.h"
+
 VALUE pcp_module = Qnil;
 VALUE pcp_pmapi_class = Qnil;
 
@@ -427,19 +429,6 @@ static VALUE rb_create_symbol_from_str(const char *name) {
     return ID2SYM(rb_intern(name));
 }
 
-static VALUE create_pmUnits(pmUnits units) {
-    VALUE pmUnitsHash = rb_hash_new();
-
-    rb_hash_aset(pmUnitsHash, rb_create_symbol_from_str("dimSpace"), INT2NUM(units.dimSpace));
-    rb_hash_aset(pmUnitsHash, rb_create_symbol_from_str("dimTime"), INT2NUM(units.dimTime));
-    rb_hash_aset(pmUnitsHash, rb_create_symbol_from_str("dimCount"), INT2NUM(units.dimCount));
-    rb_hash_aset(pmUnitsHash, rb_create_symbol_from_str("scaleSpace"), UINT2NUM(units.scaleSpace));
-    rb_hash_aset(pmUnitsHash, rb_create_symbol_from_str("scaleTime"), UINT2NUM(units.scaleTime));
-    rb_hash_aset(pmUnitsHash, rb_create_symbol_from_str("scaleCount"), INT2NUM(units.scaleCount));
-
-    return pmUnitsHash;
-}
-
 static VALUE create_pmDesc(pmDesc desc) {
     VALUE pmDescHash = rb_hash_new();
 
@@ -447,7 +436,7 @@ static VALUE create_pmDesc(pmDesc desc) {
     rb_hash_aset(pmDescHash, rb_create_symbol_from_str("type"), INT2NUM(desc.type));
     rb_hash_aset(pmDescHash, rb_create_symbol_from_str("indom"), UINT2NUM(desc.indom));
     rb_hash_aset(pmDescHash, rb_create_symbol_from_str("sem"), INT2NUM(desc.sem));
-    rb_hash_aset(pmDescHash, rb_create_symbol_from_str("units"), create_pmUnits(desc.units));
+    rb_hash_aset(pmDescHash, rb_create_symbol_from_str("units"), rb_pmapi_pmunits_new(desc.units));
 
     return pmDescHash;
 }
@@ -889,6 +878,7 @@ static VALUE rb_pmPrintValue() {
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
+    init_rb_pmapi_pmunits(pcp_pmapi_class);
     /* Exceptions */
     pcp_pmapi_error = rb_define_class_under(pcp_pmapi_class, "Error", rb_eStandardError);
     pcp_pmapi_pmns_error = rb_define_class_under(pcp_pmapi_class, "PMNSError", pcp_pmapi_error);

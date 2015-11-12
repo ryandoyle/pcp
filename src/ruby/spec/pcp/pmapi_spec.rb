@@ -253,7 +253,7 @@ describe PCP::PMAPI do
 
     describe "#pmLookupDesc" do
       it 'returns the descriptor for a PMID' do
-        expect(pmapi.pmLookupDesc(251658264)).to eq :pmid=>251658264, :type=>3, :indom=>4294967295, :sem=>1, :units=>{:dimSpace=>0, :dimTime=>0, :dimCount=>1, :scaleSpace=>0, :scaleTime=>0, :scaleCount=>0}
+        expect(pmapi.pmLookupDesc(251658264)).to eq :pmid=>251658264, :type=>3, :indom=>4294967295, :sem=>1, :units=>PCP::PMAPI::PmUnits.new(0,0,1,0,0,0)
       end
       it 'raises an error for invalid metrics IDs' do
         expect{pmapi.pmLookupDesc(123456)}.to raise_error PCP::PMAPI::PMIDError

@@ -1,4 +1,5 @@
 require 'pcp_native'
+require 'pcp/pmapi/pmunits'
 
 module PCP
   class PMAPI
