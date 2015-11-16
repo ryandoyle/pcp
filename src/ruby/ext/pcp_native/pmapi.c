@@ -948,6 +948,24 @@ void Init_pcp_native() {
     rb_define_const(pcp_pmapi_class, "PM_TIME_MIN", INT2NUM(PM_TIME_MIN));
     rb_define_const(pcp_pmapi_class, "PM_TIME_HOUR", INT2NUM(PM_TIME_HOUR));
 
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_NOSUPPORT", INT2NUM(PM_TYPE_NOSUPPORT));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_32", INT2NUM(PM_TYPE_32));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_U32", INT2NUM(PM_TYPE_U32));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_64", INT2NUM(PM_TYPE_64));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_U64", INT2NUM(PM_TYPE_U64));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_FLOAT", INT2NUM(PM_TYPE_FLOAT));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_DOUBLE", INT2NUM(PM_TYPE_DOUBLE));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_STRING", INT2NUM(PM_TYPE_STRING));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_AGGREGATE", INT2NUM(PM_TYPE_AGGREGATE));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_AGGREGATE_STATIC", INT2NUM(PM_TYPE_AGGREGATE_STATIC));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_EVENT", INT2NUM(PM_TYPE_EVENT));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_HIGHRES_EVENT", INT2NUM(PM_TYPE_HIGHRES_EVENT));
+    rb_define_const(pcp_pmapi_class, "PM_TYPE_UNKNOWN", INT2NUM(PM_TYPE_UNKNOWN));
+
+    rb_define_const(pcp_pmapi_class, "PM_SEM_COUNTER", INT2NUM(PM_SEM_COUNTER));
+    rb_define_const(pcp_pmapi_class, "PM_SEM_INSTANT", INT2NUM(PM_SEM_INSTANT));
+    rb_define_const(pcp_pmapi_class, "PM_SEM_DISCRETE", INT2NUM(PM_SEM_DISCRETE));
+
     rb_define_const(pcp_pmapi_class, "PM_CONTEXT_UNDEF", INT2NUM(PM_CONTEXT_UNDEF));
     rb_define_const(pcp_pmapi_class, "PM_CONTEXT_HOST", INT2NUM(PM_CONTEXT_HOST));
     rb_define_const(pcp_pmapi_class, "PM_CONTEXT_ARCHIVE", INT2NUM(PM_CONTEXT_ARCHIVE));
