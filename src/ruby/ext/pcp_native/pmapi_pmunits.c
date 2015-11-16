@@ -89,6 +89,13 @@ VALUE rb_pmapi_pmunits_new(pmUnits pm_units) {
     return instance;
 }
 
+pmUnits rb_pmapi_pmunits_get(VALUE self) {
+    pmUnits pm_units;
+
+    memcpy(&pm_units, rb_pmapi_pmunits_ptr(self), sizeof(pmUnits));
+
+    return pm_units;
+}
 
 void init_rb_pmapi_pmunits(VALUE pmapi_class) {
 

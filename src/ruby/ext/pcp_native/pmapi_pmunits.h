@@ -3,5 +3,6 @@
 
 void init_rb_pmapi_pmunits(VALUE);
 VALUE rb_pmapi_pmunits_new(pmUnits);
+pmUnits rb_pmapi_pmunits_get(VALUE);
 
 #endif
