@@ -16,6 +16,7 @@
 #include <pcp/pmapi.h>
 
 #include "pmapi_pmunits.h"
+#include "pmapi_pmdesc.h"
 
 VALUE pcp_module = Qnil;
 VALUE pcp_pmapi_class = Qnil;
@@ -429,18 +430,6 @@ static VALUE rb_create_symbol_from_str(const char *name) {
     return ID2SYM(rb_intern(name));
 }
 
-static VALUE create_pmDesc(pmDesc desc) {
-    VALUE pmDescHash = rb_hash_new();
-
-    rb_hash_aset(pmDescHash, rb_create_symbol_from_str("pmid"), UINT2NUM(desc.pmid));
-    rb_hash_aset(pmDescHash, rb_create_symbol_from_str("type"), INT2NUM(desc.type));
-    rb_hash_aset(pmDescHash, rb_create_symbol_from_str("indom"), UINT2NUM(desc.indom));
-    rb_hash_aset(pmDescHash, rb_create_symbol_from_str("sem"), INT2NUM(desc.sem));
-    rb_hash_aset(pmDescHash, rb_create_symbol_from_str("units"), rb_pmapi_pmunits_new(desc.units));
-
-    return pmDescHash;
-}
-
 static VALUE rb_pmLookupDesc(VALUE self, VALUE pmid) {
     int error;
     pmDesc pmDesc;
@@ -452,8 +441,7 @@ static VALUE rb_pmLookupDesc(VALUE self, VALUE pmid) {
         return Qnil;
     }
 
-    return create_pmDesc(pmDesc);
-
+    return rb_pmapi_pmdesc_new(pmDesc);
 }
 
 
@@ -879,6 +867,7 @@ void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
     init_rb_pmapi_pmunits(pcp_pmapi_class);
+    init_rb_pmapi_pmdesc(pcp_pmapi_class);
     /* Exceptions */
     pcp_pmapi_error = rb_define_class_under(pcp_pmapi_class, "Error", rb_eStandardError);
     pcp_pmapi_pmns_error = rb_define_class_under(pcp_pmapi_class, "PMNSError", pcp_pmapi_error);
