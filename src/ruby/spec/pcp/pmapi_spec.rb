@@ -155,6 +155,10 @@ describe PCP::PMAPI do
     end
   end
 
+  describe 'TODOS' do
+    it 'replace all malloc() with ALLOC()'
+  end
+
   describe 'integration tests' do
 
     let(:pmapi) { PCP::PMAPI.new(PCP::PMAPI::PM_CONTEXT_HOST, "localhost") }
