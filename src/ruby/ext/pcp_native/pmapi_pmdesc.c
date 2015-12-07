@@ -17,7 +17,7 @@ static pmDesc* rb_pmapi_pmdesc_ptr(VALUE self) {
 }
 
 static void rb_pmapi_pmdesc_free(pmDesc *pm_desc) {
-    free(pm_desc);
+    xfree(pm_desc);
 }
 
 static VALUE rb_pmapi_pmdesc_alloc(VALUE klass) {
