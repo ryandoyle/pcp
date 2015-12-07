@@ -2,7 +2,6 @@ require 'pcp/pmapi'
 
 RSpec::Matchers.define :have_the_value do |expected|
   match do |actual|
-    #actual[:vset].find { |v| v[:pmid] == @pmid }[:vlist].find{ |v| v[:inst] == @instance }[:value] == expected
     @failure_message = ""
 
     vset_for_pmid = actual[:vset].find { |v| v[:pmid] == @pmid }
@@ -12,14 +11,14 @@ RSpec::Matchers.define :have_the_value do |expected|
       return false
     end
 
-    instance = vset_for_pmid[:vlist].find{ |v| v[:inst] == @instance }
+    instance = vset_for_pmid[:vlist].find{ |v| v.inst == @instance }
     unless instance
       @failure_message << "no instance of #{@instance} found for pmid #{@pmid} "
       return false
     end
 
-    unless instance[:value] == expected
-      @failure_message << "value '#{instance[:value]}' does not match expected value '#{expected}' "
+    unless instance.value. == expected
+      @failure_message << "value '#{instance.value}' does not match expected value '#{expected}' "
       return false
     end
 
@@ -157,6 +156,7 @@ describe PCP::PMAPI do
 
   describe 'TODOS' do
     it 'replace all malloc() with ALLOC()'
+    it 'check that memory is freed before we use rb_raise()'
   end
 
   describe 'integration tests' do
@@ -454,7 +454,7 @@ describe PCP::PMAPI do
           expect(pmapi.pmFetch([121634820])[:timestamp]).to be_kind_of(Time)
         end
         it 'has the value set' do
-          expect(pmapi.pmFetch([121634820])[:vset]).to eq [{:pmid=>121634820, :numval=>1, :valfmt=>0, :vlist=>[{:inst=>4294967295, :value=>42}]}]
+          expect(pmapi.pmFetch([121634820])[:vset]).to eq [{:pmid=>121634820, :numval=>1, :valfmt=>0, :vlist=>[PCP::PMAPI::PmValue.new(-1, 42 )]}]
         end
       end
 
@@ -479,30 +479,30 @@ describe PCP::PMAPI do
           expect(pm_result).to have_the_value(3).for_pmid(121634896).and_instance(3)
           expect(pm_result).to have_the_value(4).for_pmid(121634896).and_instance(4)
 
-          expect(pm_result).to have_the_value(42).for_pmid(121634820).and_instance(PCP::PMAPI::PM_INDOM_NULL)
+          expect(pm_result).to have_the_value(42).for_pmid(121634820).and_instance(-1)
         end
       end
 
       describe 'when called for pmids of different types' do
         it 'returns string results' do
           # 121634847== sample.string.hullo
-          expect(pmapi.pmFetch([121634847])).to have_the_value("hullo world!").for_pmid(121634847).and_instance(PCP::PMAPI::PM_INDOM_NULL)
+          expect(pmapi.pmFetch([121634847])).to have_the_value("hullo world!").for_pmid(121634847).and_instance(-1)
         end
         it 'returns unsigned long results' do
           # 121634912 == sample.ulong.million
-          expect(pmapi.pmFetch([121634912])).to have_the_value(1000000).for_pmid(121634912).and_instance(PCP::PMAPI::PM_INDOM_NULL)
+          expect(pmapi.pmFetch([121634912])).to have_the_value(1000000).for_pmid(121634912).and_instance(-1)
         end
         it 'returns signed long results' do
           # 121634829 == sample.long.million
-          expect(pmapi.pmFetch([121634829])).to have_the_value(1000000).for_pmid(121634829).and_instance(PCP::PMAPI::PM_INDOM_NULL)
+          expect(pmapi.pmFetch([121634829])).to have_the_value(1000000).for_pmid(121634829).and_instance(-1)
         end
         it 'returns unsigned long long results' do
           # 121634917 == sample.ulonglong.million
-          expect(pmapi.pmFetch([121634917])).to have_the_value(1000000).for_pmid(121634917).and_instance(PCP::PMAPI::PM_INDOM_NULL)
+          expect(pmapi.pmFetch([121634917])).to have_the_value(1000000).for_pmid(121634917).and_instance(-1)
         end
         it 'returns signed long long results' do
           # 121634839 == sample.longlong.million
-          expect(pmapi.pmFetch([121634839])).to have_the_value(1000000).for_pmid(121634839).and_instance(PCP::PMAPI::PM_INDOM_NULL)
+          expect(pmapi.pmFetch([121634839])).to have_the_value(1000000).for_pmid(121634839).and_instance(-1)
         end
       end
 
