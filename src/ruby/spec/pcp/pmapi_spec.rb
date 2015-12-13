@@ -4,14 +4,14 @@ RSpec::Matchers.define :have_the_value do |expected|
   match do |actual|
     @failure_message = ""
 
-    vset_for_pmid = actual[:vset].find { |v| v[:pmid] == @pmid }
+    vset_for_pmid = actual[:vset].find { |v| v.pmid == @pmid }
 
     unless vset_for_pmid
       @failure_message << "no vset with pmid #{@pmid} found "
       return false
     end
 
-    instance = vset_for_pmid[:vlist].find{ |v| v.inst == @instance }
+    instance = vset_for_pmid.vlist.find{ |v| v.inst == @instance }
     unless instance
       @failure_message << "no instance of #{@instance} found for pmid #{@pmid} "
       return false
@@ -91,6 +91,10 @@ describe PCP::PMAPI do
       PCP::PMAPI::PMNS_LOCAL,
       PCP::PMAPI::PMNS_REMOTE,
       PCP::PMAPI::PMNS_ARCHIVE,
+
+      PCP::PMAPI::PM_VAL_INSITU,
+      PCP::PMAPI::PM_VAL_DPTR,
+      PCP::PMAPI::PM_VAL_SPTR,
 
       PCP::PMAPI::PM_ERR_GENERIC,
       PCP::PMAPI::PM_ERR_PMNS,
@@ -454,7 +458,11 @@ describe PCP::PMAPI do
           expect(pmapi.pmFetch([121634820])[:timestamp]).to be_kind_of(Time)
         end
         it 'has the value set' do
-          expect(pmapi.pmFetch([121634820])[:vset]).to eq [{:pmid=>121634820, :numval=>1, :valfmt=>0, :vlist=>[PCP::PMAPI::PmValue.new(-1, 42 )]}]
+          expect(pmapi.pmFetch([121634820])[:vset]).to eq [
+            PCP::PMAPI::PmValueSet.new(121634820, PCP::PMAPI::PM_VAL_INSITU, [
+              PCP::PMAPI::PmValue.new(-1, 42 )
+            ])
+          ]
         end
       end
 

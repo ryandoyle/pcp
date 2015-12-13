@@ -2,6 +2,7 @@ require 'pcp_native'
 require 'pcp/pmapi/pmunits'
 require 'pcp/pmapi/pmdesc'
 require 'pcp/pmapi/pmvalue'
+require 'pcp/pmapi/pmvalueset'
 
 module PCP
   class PMAPI

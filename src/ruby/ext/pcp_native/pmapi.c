@@ -19,6 +19,7 @@
 #include "pmapi_pmunits.h"
 #include "pmapi_pmdesc.h"
 #include "pmapi_pmvalue.h"
+#include "pmapi_pmvalueset.h"
 
 VALUE pcp_module = Qnil;
 VALUE pcp_pmapi_class = Qnil;
@@ -622,40 +623,13 @@ static VALUE rb_pmAddProfile(VALUE self, VALUE indom, VALUE instance_identifiers
     return Qnil;
 }
 
-static VALUE build_pm_values(pmValueSet *value_set) {
-    int i, error;
-    VALUE pm_values;
-    pmDesc metric_description;
-
-    pm_values = rb_ary_new2(value_set->numval);
-
-    /* We've got to get the metric description so we know how to decode the result */
-    if((error = pmLookupDesc(value_set->pmid, &metric_description)) < 0 ) {
-        rb_pmapi_raise_error_from_pm_error_code(error);
-        return Qnil;
-    }
-
-
-    for(i = 0; i < value_set->numval; i++) {
-        rb_ary_push(pm_values, rb_pmapi_pmvalue_new(value_set->vlist[i], value_set->valfmt, metric_description.type));
-    }
-
-    return pm_values;
-}
-
 static VALUE build_pm_result_set(pmResult *pm_result) {
     int i;
     VALUE pm_value_sets;
     pm_value_sets = rb_ary_new2(pm_result->numpmid);
 
     for(i = 0; i < pm_result->numpmid; i++) {
-        VALUE pm_value_set;
-        pm_value_set = rb_hash_new();
-        rb_hash_aset(pm_value_set, rb_create_symbol_from_str("pmid"), UINT2NUM(pm_result->vset[i]->pmid));
-        rb_hash_aset(pm_value_set, rb_create_symbol_from_str("numval"), INT2NUM(pm_result->vset[i]->numval));
-        rb_hash_aset(pm_value_set, rb_create_symbol_from_str("valfmt"), INT2NUM(pm_result->vset[i]->valfmt));
-        rb_hash_aset(pm_value_set, rb_create_symbol_from_str("vlist"), build_pm_values(pm_result->vset[i]));
-        rb_ary_push(pm_value_sets, pm_value_set);
+        rb_ary_push(pm_value_sets, rb_pmapi_pmvalueset_new(pm_result->vset[i]));
     }
 
     return pm_value_sets;
@@ -814,6 +788,7 @@ void Init_pcp_native() {
     init_rb_pmapi_pmunits(pcp_pmapi_class);
     init_rb_pmapi_pmdesc(pcp_pmapi_class);
     init_rb_pmapi_pmvalue(pcp_pmapi_class);
+    init_rb_pmapi_pmvalueset(pcp_pmapi_class);
 
     /* Exceptions */
     pcp_pmapi_error = rb_define_class_under(pcp_pmapi_class, "Error", rb_eStandardError);
@@ -916,6 +891,10 @@ void Init_pcp_native() {
     rb_define_const(pcp_pmapi_class, "PMNS_LOCAL", INT2NUM(PMNS_LOCAL));
     rb_define_const(pcp_pmapi_class, "PMNS_REMOTE", INT2NUM(PMNS_REMOTE));
     rb_define_const(pcp_pmapi_class, "PMNS_ARCHIVE", INT2NUM(PMNS_ARCHIVE));
+
+    rb_define_const(pcp_pmapi_class, "PM_VAL_INSITU", INT2NUM(PM_VAL_INSITU));
+    rb_define_const(pcp_pmapi_class, "PM_VAL_DPTR", INT2NUM(PM_VAL_DPTR));
+    rb_define_const(pcp_pmapi_class, "PM_VAL_SPTR", INT2NUM(PM_VAL_SPTR));
 
     rb_define_const(pcp_pmapi_class, "PM_ERR_GENERIC", INT2NUM(PM_ERR_GENERIC));
     rb_define_const(pcp_pmapi_class, "PM_ERR_PMNS", INT2NUM(PM_ERR_PMNS));
