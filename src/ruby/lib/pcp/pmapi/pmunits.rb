@@ -4,28 +4,14 @@ module PCP
   class PMAPI
     class PmUnits
 
-      def initialize(dimSpace, dimTime, dimCount, scaleSpace, scaleTime, scaleCount)
-        self.dimSpace = dimSpace
-        self.dimTime = dimTime
-        self.dimCount = dimCount
-        self.scaleSpace = scaleSpace
-        self.scaleTime = scaleTime
-        self.scaleCount = scaleCount
-      end
-
-      def to_h
-        {
-          :dimSpace => dimSpace,
-          :dimTime  => dimTime,
-          :dimCount => dimCount,
-          :scaleSpace => scaleSpace,
-          :scaleTime => scaleTime,
-          :scaleCount => scaleCount,
-        }
-      end
-
       def ==(other)
-        other.is_a?(PCP::PMAPI::PmUnits) && to_h == other.to_h
+        self.class == other.class && \
+        dimSpace == other.dimSpace && \
+        dimTime == other.dimTime && \
+        dimCount == other.dimCount && \
+        scaleSpace == other.scaleSpace && \
+        scaleTime == other.scaleTime && \
+        scaleCount == other.scaleCount
       end
 
       def inspect
