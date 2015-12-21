@@ -61,13 +61,13 @@ static VALUE rb_pmapi_pmunits_scaleCount(VALUE self) {
     return INT2NUM(rb_pmapi_pmunits_ptr(self)->scaleCount);
 }
 
-VALUE rb_pmapi_pmunits_new(pmUnits pm_units) {
+VALUE rb_pmapi_pmunits_new_from_pmdesc(pmUnits *pm_units, VALUE pm_desc) {
     VALUE instance;
-    pmUnits *units_from_instance;
 
-    instance = rb_pmapi_pmunits_alloc(pcp_pmapi_pmunits_class);
-    Data_Get_Struct(instance, pmUnits, units_from_instance);
-    memcpy(units_from_instance, &pm_units, sizeof(pmUnits));
+    instance = Data_Wrap_Struct(pcp_pmapi_pmunits_class, 0, 0, pm_units);
+    /* Keep a reference to pm_desc. The pmUnits struct we are passing in is owned by
+     * the pmDesc struct and it manages the memory that this class uses */
+    rb_iv_set(instance, "@pmdesc", pm_desc);
 
     return instance;
 }

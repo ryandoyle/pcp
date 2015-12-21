@@ -56,7 +56,15 @@ static VALUE rb_pmapi_pmdesc_sem(VALUE self) {
 }
 
 static VALUE rb_pmapi_pmdesc_units(VALUE self) {
-    return rb_pmapi_pmunits_new(rb_pmapi_pmdesc_ptr(self)->units);
+    VALUE pmunits = rb_iv_get(self, "@units");
+
+    /* Cache the units object of we haven't created one already */
+    if(NIL_P(pmunits)) {
+        pmunits = rb_pmapi_pmunits_new_from_pmdesc(&rb_pmapi_pmdesc_ptr(self)->units, self);
+        rb_iv_set(self, "@units", pmunits);
+    }
+
+    return pmunits;
 }
 
 VALUE rb_pmapi_pmdesc_new(pmDesc pm_desc) {
