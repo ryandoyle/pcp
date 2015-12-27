@@ -3,6 +3,7 @@ require 'pcp/pmapi/pmunits'
 require 'pcp/pmapi/pmdesc'
 require 'pcp/pmapi/pmvalue'
 require 'pcp/pmapi/pmvalueset'
+require 'pcp/pmapi/pmvalueblock'
 
 module PCP
   class PMAPI

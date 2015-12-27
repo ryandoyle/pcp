@@ -19,6 +19,7 @@
 #include "pmapi_pmunits.h"
 #include "pmapi_pmdesc.h"
 #include "pmapi_pmvalue.h"
+#include "pmapi_pmvalueblock.h"
 #include "pmapi_pmvalueset.h"
 
 VALUE pcp_module = Qnil;
@@ -789,6 +790,7 @@ void Init_pcp_native() {
     init_rb_pmapi_pmdesc(pcp_pmapi_class);
     init_rb_pmapi_pmvalue(pcp_pmapi_class);
     init_rb_pmapi_pmvalueset(pcp_pmapi_class);
+    init_rb_pmapi_pmvalueblock(pcp_pmapi_class);
 
     /* Exceptions */
     pcp_pmapi_error = rb_define_class_under(pcp_pmapi_class, "Error", rb_eStandardError);
@@ -891,6 +893,8 @@ void Init_pcp_native() {
     rb_define_const(pcp_pmapi_class, "PMNS_LOCAL", INT2NUM(PMNS_LOCAL));
     rb_define_const(pcp_pmapi_class, "PMNS_REMOTE", INT2NUM(PMNS_REMOTE));
     rb_define_const(pcp_pmapi_class, "PMNS_ARCHIVE", INT2NUM(PMNS_ARCHIVE));
+
+    rb_define_const(pcp_pmapi_class, "PM_VAL_HDR_SIZE", UINT2NUM(PM_VAL_HDR_SIZE));
 
     rb_define_const(pcp_pmapi_class, "PM_VAL_INSITU", INT2NUM(PM_VAL_INSITU));
     rb_define_const(pcp_pmapi_class, "PM_VAL_DPTR", INT2NUM(PM_VAL_DPTR));
