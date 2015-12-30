@@ -87,6 +87,10 @@ VALUE rb_pmapi_pmvalue_new(pmValue pm_value, int value_format) {
     return instance;
 }
 
+pmValue rb_pmapi_pmvalue_ptr(VALUE pm_value) {
+    return get_pmvalue_ptr(pm_value)->pm_value;
+}
+
 void init_rb_pmapi_pmvalue(VALUE pmapi_class) {
     pcp_pmapi_pmvalue_class = rb_define_class_under(pmapi_class, "PmValue", rb_cObject);
 

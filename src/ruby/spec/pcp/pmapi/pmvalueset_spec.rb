@@ -3,26 +3,46 @@ require 'pcp/pmapi'
 describe PCP::PMAPI::PmValueSet do
 
   let(:pm_value_set) { described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, [pm_value]) }
-  let(:pm_value) { double('PCP::PMAPI::PmValue') }
+  let(:pm_value) { PCP::PMAPI::PmValue.new(111, 222) }
+  let(:pm_value2) { PCP::PMAPI::PmValue.new(333, 444) }
 
-  before do
-    allow(pm_value).to receive(:class).and_return PCP::PMAPI::PmValue
+
+  describe '#new' do
+    it 'should set the vlist to the PmValue' do
+      pm_value_set = described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, [pm_value])
+      expect(pm_value_set.vlist).to eq [pm_value]
+    end
+
+    it 'should set the vlist for more than one PmValue' do
+      pm_value_set = described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, [pm_value, pm_value2])
+      expect(pm_value_set.vlist).to eq [pm_value, pm_value2]
+    end
+
+    it 'should raise an error for non-numeric PMIDs' do
+      expect{described_class.new("not a number", PCP::PMAPI::PM_VAL_INSITU, [pm_value])}.to raise_error TypeError
+    end
+
+    it 'should raise an error if the vlist is not an array' do
+      expect{described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, pm_value)}.to raise_error ArgumentError
+    end
+
+    it 'should raise an error if the vlist array contains non-PmValue types' do
+      expect{described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, [1])}.to raise_error ArgumentError
+    end
+
+    it 'should raise an error if the vlist contains any non-PmValue types' do
+      expect{described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, [pm_value, 1])}.to raise_error ArgumentError
+    end
+
+    it 'should raise an error for non-numeric value formats' do
+      expect{described_class.new(123, "not a number", [])}.to raise_error TypeError
+    end
+
   end
 
   describe '#pmid' do
     it 'should return the PMID' do
       expect(pm_value_set.pmid).to eq 123
-    end
-  end
-
-  describe '#pmid=' do
-    it 'should set the pmid' do
-      pm_value_set.pmid = 456
-      expect(pm_value_set.pmid).to eq 456
-    end
-
-    it 'should raise an error for non-numeric PMIDs' do
-      expect{pm_value_set.pmid = "Not a number"}.to raise_error TypeError
     end
   end
 
@@ -32,41 +52,11 @@ describe PCP::PMAPI::PmValueSet do
     end
   end
 
-  describe 'valfmt=' do
-    it 'should set the valfmt' do
-      pm_value_set.valfmt = PCP::PMAPI::PM_VAL_DPTR
-      expect(pm_value_set.valfmt).to eq PCP::PMAPI::PM_VAL_DPTR
-    end
-
-    it 'should raise an error for non-numeric value formats' do
-      expect{pm_value_set.valfmt = "Not a number"}.to raise_error TypeError
-    end
-  end
-
   describe '#vlist' do
     it 'should return a list of PmValue(s)' do
       pm_value_set = described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, [pm_value])
 
       expect(pm_value_set.vlist).to eq [pm_value]
-    end
-  end
-
-  describe '#vlist=' do
-    it 'should set the vlist to the PmValue' do
-      pm_value_set.vlist = [pm_value]
-      expect(pm_value_set.vlist).to eq [pm_value]
-    end
-
-    it 'should raise an error if the vlist is not an array' do
-      expect{pm_value_set.vlist = pm_value}.to raise_error ArgumentError
-    end
-
-    it 'should raise an error if the vlist array contains non-PmValue types' do
-      expect{pm_value_set.vlist = [1]}.to raise_error ArgumentError
-    end
-
-    it 'should raise an error if the vlist contains any non-PmValue types' do
-      expect{pm_value_set.vlist = [pm_value, 1]}.to raise_error ArgumentError
     end
   end
 
