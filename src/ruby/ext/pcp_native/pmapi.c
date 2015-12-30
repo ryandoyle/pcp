@@ -21,6 +21,7 @@
 #include "pmapi_pmvalue.h"
 #include "pmapi_pmvalueblock.h"
 #include "pmapi_pmvalueset.h"
+#include "pmapi_ctest.h"
 
 VALUE pcp_module = Qnil;
 VALUE pcp_pmapi_class = Qnil;
@@ -791,6 +792,7 @@ void Init_pcp_native() {
     init_rb_pmapi_pmvalue(pcp_pmapi_class);
     init_rb_pmapi_pmvalueset(pcp_pmapi_class);
     init_rb_pmapi_pmvalueblock(pcp_pmapi_class);
+    init_rb_pmapi_ctest(pcp_pmapi_class);
 
     /* Exceptions */
     pcp_pmapi_error = rb_define_class_under(pcp_pmapi_class, "Error", rb_eStandardError);

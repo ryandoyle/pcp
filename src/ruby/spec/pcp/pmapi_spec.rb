@@ -1,4 +1,4 @@
-require 'pcp/pmapi'
+require 'spec_helper'
 
 RSpec::Matchers.define :have_the_value do |expected|
   match do |actual|

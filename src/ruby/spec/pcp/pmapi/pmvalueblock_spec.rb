@@ -1,4 +1,4 @@
-require 'pcp/pmapi'
+require 'spec_helper'
 
 
 # Ruby does not support C float so precision is lost going from a double (which is
@@ -165,5 +165,24 @@ describe PCP::PMAPI::PmValueBlock do
       expect(instance2).to_not eq instance1
     end
   end
+
+
+  describe 'converting Ruby object to C' do
+
+    let(:pm_value_block) { pm_value_block = described_class.new('aaaa', PCP::PMAPI::PM_TYPE_STRING) }
+
+    it 'should return the vbuf' do
+      expect(pmvalueblock_get_vbuf(pm_value_block)).to eq 'aaaa'
+    end
+
+    it 'should return the vlen' do
+      expect(pmvalueblock_get_vlen(pm_value_block)).to eq 9
+    end
+
+    it 'should return the vtype' do
+      expect(pmvalueblock_get_vtype(pm_value_block)).to eq PCP::PMAPI::PM_TYPE_STRING
+    end
+  end
+
 
 end

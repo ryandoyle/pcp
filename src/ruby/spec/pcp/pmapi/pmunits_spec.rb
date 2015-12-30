@@ -1,4 +1,4 @@
-require 'pcp/pmapi/pmunits'
+require 'spec_helper'
 
 describe PCP::PMAPI::PmUnits do
 

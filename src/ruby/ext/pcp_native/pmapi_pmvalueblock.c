@@ -187,7 +187,7 @@ VALUE rb_pmapi_pmvalueblock_new(pmValueBlock *pm_value_block) {
     return Data_Wrap_Struct(pcp_pmapi_pmvalueblock_class, 0, free_pmvalueblock, pm_valueblock_wrapper);
 }
 
-pmValueBlock *rb_pmapi_pmvalueblock_ptr(VALUE pm_value_block) {
+pmValueBlock* rb_pmapi_pmvalueblock_ptr(VALUE pm_value_block) {
     pmValueBlockWrapper *pm_value_block_wrapper;
 
     Data_Get_Struct(pm_value_block, pmValueBlockWrapper, pm_value_block_wrapper);

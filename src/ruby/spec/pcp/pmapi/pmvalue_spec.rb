@@ -1,4 +1,4 @@
-require 'pcp/pmapi'
+require 'spec_helper'
 
 
 describe PCP::PMAPI::PmValue do
