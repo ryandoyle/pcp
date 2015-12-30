@@ -12,7 +12,7 @@ typedef struct rb_pmapi_pmvalue_wrapper {
     int value_format;
 } pmValueWrapper;
 
-static pmValueWrapper* rb_pmapi_pmvalue_ptr(VALUE self) {
+static pmValueWrapper* get_pmvalue_ptr(VALUE self) {
     pmValueWrapper *pm_value;
 
     Data_Get_Struct(self, pmValueWrapper, pm_value);
@@ -20,18 +20,18 @@ static pmValueWrapper* rb_pmapi_pmvalue_ptr(VALUE self) {
     return pm_value;
 }
 
-static void rb_pmapi_pmvalue_free(pmValueWrapper *pm_value_wrapper) {
+static void free_pmvalue(pmValueWrapper *pm_value_wrapper) {
     xfree(pm_value_wrapper);
 };
 
-static VALUE rb_pmapi_pmvalue_alloc(VALUE klass) {
+static VALUE allocate_pmvalue(VALUE klass) {
     pmValueWrapper *pmvalue_to_wrap = ALLOC(pmValueWrapper);
 
-    return Data_Wrap_Struct(klass, 0 , rb_pmapi_pmvalue_free, pmvalue_to_wrap);
+    return Data_Wrap_Struct(klass, 0 , free_pmvalue, pmvalue_to_wrap);
 }
 
 static VALUE initialize(VALUE self, VALUE inst, VALUE value) {
-    pmValueWrapper *pm_value_wrapper = rb_pmapi_pmvalue_ptr(self);
+    pmValueWrapper *pm_value_wrapper = get_pmvalue_ptr(self);
 
     if(CLASS_OF(value) == pcp_pmapi_pmvalueblock_class) {
         pm_value_wrapper->pm_value.value.pval = rb_pmapi_pmvalueblock_ptr(value);
@@ -68,14 +68,14 @@ static VALUE build_value(pmValue pm_value, int value_format) {
 }
 
 static VALUE get_inst(VALUE self) {
-    return INT2NUM(rb_pmapi_pmvalue_ptr(self)->pm_value.inst);
+    return INT2NUM(get_pmvalue_ptr(self)->pm_value.inst);
 }
 
 VALUE rb_pmapi_pmvalue_new(pmValue pm_value, int value_format) {
     VALUE instance;
     pmValueWrapper *pm_value_from_instance;
 
-    instance = rb_pmapi_pmvalue_alloc(pcp_pmapi_pmvalue_class);
+    instance = allocate_pmvalue(pcp_pmapi_pmvalue_class);
     Data_Get_Struct(instance, pmValueWrapper, pm_value_from_instance);
 
     /* Copy over the struct into our allocated struct  */
@@ -90,7 +90,7 @@ VALUE rb_pmapi_pmvalue_new(pmValue pm_value, int value_format) {
 void init_rb_pmapi_pmvalue(VALUE pmapi_class) {
     pcp_pmapi_pmvalue_class = rb_define_class_under(pmapi_class, "PmValue", rb_cObject);
 
-    rb_define_alloc_func(pcp_pmapi_pmvalue_class, rb_pmapi_pmvalue_alloc);
+    rb_define_alloc_func(pcp_pmapi_pmvalue_class, allocate_pmvalue);
     rb_define_method(pcp_pmapi_pmvalue_class, "initialize", initialize, 2);
     rb_define_method(pcp_pmapi_pmvalue_class, "inst", get_inst, 0);
     rb_define_attr(pcp_pmapi_pmvalue_class, "value", 1, 0);

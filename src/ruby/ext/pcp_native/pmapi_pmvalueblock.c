@@ -15,14 +15,14 @@ typedef struct pmValueBlockWrapper {
     pmValueBlock *pm_value_block_ptr;
 } pmValueBlockWrapper;
 
-static void rb_pmapi_pmvalueblock_free(void *pm_value_block_wrapper) {
+static void free_pmvalueblock(void *pm_value_block_wrapper) {
     pmValueBlockWrapper *wrapper = (pmValueBlockWrapper *)pm_value_block_wrapper;
 
     xfree(wrapper->pm_value_block_ptr);
     xfree(wrapper);
 }
 
-static VALUE rb_pmapi_pmvalueblock_alloc(VALUE klass) {
+static VALUE allocate_pmvalueblock(VALUE klass) {
     pmValueBlockWrapper *pm_valueblock_wrapper = ALLOC(pmValueBlockWrapper);
     /* We don't know the size of the vbuf yet. That will be realloc()ed later */
     pmValueBlock *pm_value_block = ALLOC(pmValueBlock);
@@ -32,7 +32,7 @@ static VALUE rb_pmapi_pmvalueblock_alloc(VALUE klass) {
 
     pm_valueblock_wrapper->pm_value_block_ptr = pm_value_block;
 
-    return Data_Wrap_Struct(klass, 0, rb_pmapi_pmvalueblock_free, pm_valueblock_wrapper);
+    return Data_Wrap_Struct(klass, 0, free_pmvalueblock, pm_valueblock_wrapper);
 }
 
 static void increase_vbuf_by(pmValueBlockWrapper *pm_value_block_wrapper, size_t size) {
@@ -124,7 +124,7 @@ static VALUE initialize(VALUE self, VALUE value, VALUE type) {
     return self;
 }
 
-static VALUE vbuf(VALUE self) {
+static VALUE get_vbuf(VALUE self) {
     VALUE result;
     pmValueBlock *pm_value_block = get_pm_value_block_from_wrapper(self);
     char *vbuf = pm_value_block->vbuf;
@@ -163,13 +163,13 @@ static VALUE vbuf(VALUE self) {
     return result;
 }
 
-static VALUE vlen(VALUE self) {
+static VALUE get_vlen(VALUE self) {
     unsigned int vlen = get_pm_value_block_from_wrapper(self)->vlen;
 
     return UINT2NUM(vlen);
 }
 
-static VALUE vtype(VALUE self) {
+static VALUE get_vtype(VALUE self) {
     unsigned int vtype = get_pm_value_block_from_wrapper(self)->vtype;
 
     return UINT2NUM(vtype);
@@ -184,7 +184,7 @@ VALUE rb_pmapi_pmvalueblock_new(pmValueBlock *pm_value_block) {
 
     pm_valueblock_wrapper->pm_value_block_ptr = wrapped_pm_value_block;
 
-    return Data_Wrap_Struct(pcp_pmapi_pmvalueblock_class, 0, rb_pmapi_pmvalueblock_free, pm_valueblock_wrapper);
+    return Data_Wrap_Struct(pcp_pmapi_pmvalueblock_class, 0, free_pmvalueblock, pm_valueblock_wrapper);
 }
 
 pmValueBlock *rb_pmapi_pmvalueblock_ptr(VALUE pm_value_block) {
@@ -199,9 +199,9 @@ void init_rb_pmapi_pmvalueblock(VALUE pmapi_class) {
     pcp_pmapi_pmvalueblock_class = rb_define_class_under(pmapi_class, "PmValueBlock", rb_cObject);
 
     rb_define_method(pcp_pmapi_pmvalueblock_class, "initialize", initialize, 2);
-    rb_define_method(pcp_pmapi_pmvalueblock_class, "vbuf", vbuf, 0);
-    rb_define_method(pcp_pmapi_pmvalueblock_class, "vlen", vlen, 0);
-    rb_define_method(pcp_pmapi_pmvalueblock_class, "vtype", vtype, 0);
+    rb_define_method(pcp_pmapi_pmvalueblock_class, "vbuf", get_vbuf, 0);
+    rb_define_method(pcp_pmapi_pmvalueblock_class, "vlen", get_vlen, 0);
+    rb_define_method(pcp_pmapi_pmvalueblock_class, "vtype", get_vtype, 0);
 
-    rb_define_alloc_func(pcp_pmapi_pmvalueblock_class, rb_pmapi_pmvalueblock_alloc);
+    rb_define_alloc_func(pcp_pmapi_pmvalueblock_class, allocate_pmvalueblock);
 }
