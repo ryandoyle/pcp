@@ -187,6 +187,14 @@ VALUE rb_pmapi_pmvalueblock_new(pmValueBlock *pm_value_block) {
     return Data_Wrap_Struct(pcp_pmapi_pmvalueblock_class, 0, rb_pmapi_pmvalueblock_free, pm_valueblock_wrapper);
 }
 
+pmValueBlock *rb_pmapi_pmvalueblock_ptr(VALUE pm_value_block) {
+    pmValueBlockWrapper *pm_value_block_wrapper;
+
+    Data_Get_Struct(pm_value_block, pmValueBlockWrapper, pm_value_block_wrapper);
+
+    return pm_value_block_wrapper->pm_value_block_ptr;
+}
+
 void init_rb_pmapi_pmvalueblock(VALUE pmapi_class) {
     pcp_pmapi_pmvalueblock_class = rb_define_class_under(pmapi_class, "PmValueBlock", rb_cObject);
 

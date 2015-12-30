@@ -5,6 +5,21 @@ describe PCP::PMAPI::PmValue do
 
   let(:pm_value) { described_class.new(111, 222) }
 
+  describe '#new' do
+    it 'should construct correctly for Fixnum values' do
+      expect{described_class.new(111, 222)}.to_not raise_error
+    end
+    it 'should construct correctly for PmValueBlock values' do
+      expect{described_class.new(111, PCP::PMAPI::PmValueBlock.new('hello', PCP::PMAPI::PM_TYPE_STRING))}.to_not raise_error
+    end
+    it 'should raise an error if constructed with neither a Fixnum or PmValueBlock' do
+      expect{described_class.new(111, "hello")}.to raise_error ArgumentError
+    end
+    it 'should raise an error if constructed with a number too big to fit insitu' do
+      expect{described_class.new(111, 123123123131)}.to raise_error RangeError
+    end
+  end
+
   describe '#value' do
     it 'should return the value' do
       expect(pm_value.value).to eq 222
@@ -17,11 +32,6 @@ describe PCP::PMAPI::PmValue do
     end
   end
 
-  describe '#inst=' do
-    it 'should raise an error if set with an invalid type' do
-      expect{pm_value.inst = ["invalid"]}.to raise_error TypeError
-    end
-  end
 
   describe '#==' do
     it 'should be true for PmValue classes that hold the same instance and value' do

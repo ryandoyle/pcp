@@ -30,35 +30,44 @@ static VALUE rb_pmapi_pmvalue_alloc(VALUE klass) {
     return Data_Wrap_Struct(klass, 0 , rb_pmapi_pmvalue_free, pmvalue_to_wrap);
 }
 
-static VALUE value(VALUE self) {
+static VALUE initialize(VALUE self, VALUE inst, VALUE value) {
     pmValueWrapper *pm_value_wrapper = rb_pmapi_pmvalue_ptr(self);
-    int value_format = pm_value_wrapper->value_format;
 
-    VALUE value = rb_iv_get(self, "@value");
+    if(CLASS_OF(value) == pcp_pmapi_pmvalueblock_class) {
+        pm_value_wrapper->pm_value.value.pval = rb_pmapi_pmvalueblock_ptr(value);
+        pm_value_wrapper->value_format = PM_VAL_DPTR;
+    } else if(CLASS_OF(value) == rb_cFixnum) {
+        pm_value_wrapper->pm_value.value.lval = NUM2INT(value);
+        pm_value_wrapper->value_format = PM_VAL_INSITU;
+    } else {
+        rb_raise(rb_eArgError, "value must be of class PCP::PMAPI::PmValueBlock or Fixnum");
+    }
 
-    if(NIL_P(value)) {
-        switch (value_format) {
-            case PM_VAL_INSITU:
-                value = INT2NUM(pm_value_wrapper->pm_value.value.lval);
-                break;
-            case PM_VAL_DPTR:
-                value = rb_pmapi_pmvalueblock_new(pm_value_wrapper->pm_value.value.pval);
-                break;
-            default:
-                rb_raise(pcp_pmapi_error, "Value format %d not supported for PmValue", value_format);
-        }
-        rb_iv_set(self, "@value", value);
+    rb_iv_set(self, "@value", value);
+
+    pm_value_wrapper->pm_value.inst = NUM2INT(inst);
+
+    return self;
+}
+
+static VALUE build_value(pmValue pm_value, int value_format) {
+    VALUE value = Qnil;
+
+    switch (value_format) {
+        case PM_VAL_INSITU:
+            value = INT2NUM(pm_value.value.lval);
+            break;
+        case PM_VAL_DPTR:
+            value = rb_pmapi_pmvalueblock_new(pm_value.value.pval);
+            break;
+        default:
+            rb_raise(pcp_pmapi_error, "Value format %d not supported for PmValue", value_format);
     }
 
     return value;
 }
 
-static VALUE rb_pmapi_pmvalue_inst_set(VALUE self, VALUE inst) {
-    rb_pmapi_pmvalue_ptr(self)->pm_value.inst = NUM2INT(inst);
-    return Qnil;
-}
-
-static VALUE rb_pmapi_pmvalue_inst(VALUE self) {
+static VALUE get_inst(VALUE self) {
     return INT2NUM(rb_pmapi_pmvalue_ptr(self)->pm_value.inst);
 }
 
@@ -73,6 +82,7 @@ VALUE rb_pmapi_pmvalue_new(pmValue pm_value, int value_format) {
     memcpy(&pm_value_from_instance->pm_value, &pm_value, sizeof(pmValue));
     pm_value_from_instance->value_format = value_format;
 
+    rb_iv_set(instance, "@value", build_value(pm_value, value_format));
 
     return instance;
 }
@@ -81,7 +91,7 @@ void init_rb_pmapi_pmvalue(VALUE pmapi_class) {
     pcp_pmapi_pmvalue_class = rb_define_class_under(pmapi_class, "PmValue", rb_cObject);
 
     rb_define_alloc_func(pcp_pmapi_pmvalue_class, rb_pmapi_pmvalue_alloc);
-    rb_define_method(pcp_pmapi_pmvalue_class, "inst=", rb_pmapi_pmvalue_inst_set, 1);
-    rb_define_method(pcp_pmapi_pmvalue_class, "inst", rb_pmapi_pmvalue_inst, 0);
-    rb_define_method(pcp_pmapi_pmvalue_class, "value", value, 0);
+    rb_define_method(pcp_pmapi_pmvalue_class, "initialize", initialize, 2);
+    rb_define_method(pcp_pmapi_pmvalue_class, "inst", get_inst, 0);
+    rb_define_attr(pcp_pmapi_pmvalue_class, "value", 1, 0);
 }

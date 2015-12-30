@@ -4,11 +4,6 @@ module PCP
   class PMAPI
     class PmValue
 
-      def initialize(inst, value)
-        self.inst = inst
-        @value = value
-      end
-
       def ==(other)
         self.class == other.class && \
         inst == other.inst && \
