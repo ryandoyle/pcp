@@ -56,4 +56,25 @@ describe PCP::PMAPI::PmValue do
     end
   end
 
+  describe 'converting Ruby objects to C' do
+    it 'should have the inst' do
+      pm_value = described_class.new(123, 222)
+
+      expect(pmvalue_get_inst(pm_value)).to eq 123
+    end
+
+    it 'should have a value for insitu values' do
+      pm_value = described_class.new(123, 222)
+
+      expect(pmvalue_get_insitu_value(pm_value)).to eq 222
+    end
+
+    it 'should have a value for pmvalueblock values' do
+      pm_value_block = PCP::PMAPI::PmValueBlock.new('hello', PCP::PMAPI::PM_TYPE_STRING)
+      pm_value = described_class.new(123, pm_value_block)
+
+      expect(pmvalue_get_pmvalueblock_vbuf_as_string(pm_value)).to eq 'hello'
+    end
+  end
+
 end
