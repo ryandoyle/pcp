@@ -1,4 +1,4 @@
-require 'pcp_native'
+require 'pcp/pmapi'
 
 module PCP
   class PMAPI
@@ -9,14 +9,14 @@ module PCP
         @value = value
       end
 
-      attr_accessor :value
-
       def ==(other)
-        inst == other.inst && value == other.value
+        self.class == other.class && \
+        inst == other.inst && \
+        value == other.value
       end
 
       def inspect
-        "#<#{self.class.name}: inst=#{inst} value=#{value}>"
+        "#<#{self.class.name}: inst=#{inst} value=#{value.inspect}>"
       end
 
     end

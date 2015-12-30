@@ -3,81 +3,54 @@
 
 #include "pmapi_pmvalue.h"
 #include "pmapi.h"
+#include "pmapi_pmvalueblock.h"
 
 VALUE pcp_pmapi_pmvalue_class = Qnil;
 
-struct rb_pmapi_pmvalue_wrapper {
+typedef struct rb_pmapi_pmvalue_wrapper {
     pmValue pm_value;
     int value_format;
-    int metric_type;
-};
+} pmValueWrapper;
 
-static struct rb_pmapi_pmvalue_wrapper* rb_pmapi_pmvalue_ptr(VALUE self) {
-    struct rb_pmapi_pmvalue_wrapper *pm_value;
+static pmValueWrapper* rb_pmapi_pmvalue_ptr(VALUE self) {
+    pmValueWrapper *pm_value;
 
-    Data_Get_Struct(self, struct rb_pmapi_pmvalue_wrapper, pm_value);
+    Data_Get_Struct(self, pmValueWrapper, pm_value);
 
     return pm_value;
 }
 
-static void rb_pmapi_pmvalue_free(struct rb_pmapi_pmvalue_wrapper *pm_value_wrapper) {
+static void rb_pmapi_pmvalue_free(pmValueWrapper *pm_value_wrapper) {
     xfree(pm_value_wrapper);
 };
 
 static VALUE rb_pmapi_pmvalue_alloc(VALUE klass) {
-    struct rb_pmapi_pmvalue_wrapper *pmvalue_to_wrap = ALLOC(struct rb_pmapi_pmvalue_wrapper);
+    pmValueWrapper *pmvalue_to_wrap = ALLOC(pmValueWrapper);
 
     return Data_Wrap_Struct(klass, 0 , rb_pmapi_pmvalue_free, pmvalue_to_wrap);
 }
 
-static VALUE rb_pmapi_pmvalue_build(struct rb_pmapi_pmvalue_wrapper *pm_value_wrapper) {
-    pmAtomValue atom_value;
-    int error;
-    VALUE result = Qnil;
+static VALUE value(VALUE self) {
+    pmValueWrapper *pm_value_wrapper = rb_pmapi_pmvalue_ptr(self);
+    int value_format = pm_value_wrapper->value_format;
 
-    atom_value.cp = NULL;
+    VALUE value = rb_iv_get(self, "@value");
 
-    if((error = pmExtractValue(pm_value_wrapper->value_format, &pm_value_wrapper->pm_value, pm_value_wrapper->metric_type, &atom_value, pm_value_wrapper->metric_type))) {
-        rb_pmapi_raise_error_from_pm_error_code(error);
-        return Qnil;
+    if(NIL_P(value)) {
+        switch (value_format) {
+            case PM_VAL_INSITU:
+                value = INT2NUM(pm_value_wrapper->pm_value.value.lval);
+                break;
+            case PM_VAL_DPTR:
+                value = rb_pmapi_pmvalueblock_new(pm_value_wrapper->pm_value.value.pval);
+                break;
+            default:
+                rb_raise(pcp_pmapi_error, "Value format %d not supported for PmValue", value_format);
+        }
+        rb_iv_set(self, "@value", value);
     }
 
-    switch(pm_value_wrapper->metric_type) {
-        case PM_TYPE_32:
-            result = LONG2NUM(atom_value.l);
-            break;
-        case PM_TYPE_U32:
-            result = ULONG2NUM(atom_value.ul);
-            break;
-        case PM_TYPE_64:
-            result = LL2NUM(atom_value.ll);
-            break;
-        case PM_TYPE_U64:
-            result = ULL2NUM(atom_value.ull);
-            break;
-        case PM_TYPE_FLOAT:
-            result = DBL2NUM((double)atom_value.f);
-            break;
-        case PM_TYPE_DOUBLE:
-            result = DBL2NUM(atom_value.d);
-            break;
-        case PM_TYPE_STRING:
-            result = rb_tainted_str_new_cstr(atom_value.cp);
-            free(atom_value.cp);
-            break;
-        case PM_TYPE_AGGREGATE:
-            /* No support for aggregate but pmExtractValue() will still malloc */
-            free(atom_value.vbp);
-        case PM_TYPE_AGGREGATE_STATIC:
-        case PM_TYPE_EVENT:
-        case PM_TYPE_HIGHRES_EVENT:
-        case PM_TYPE_UNKNOWN:
-        case PM_TYPE_NOSUPPORT:
-        default:
-            rb_raise(pcp_pmapi_error, "Metric data type %d not supported", pm_value_wrapper->metric_type);
-    }
-
-    return result;
+    return value;
 }
 
 static VALUE rb_pmapi_pmvalue_inst_set(VALUE self, VALUE inst) {
@@ -89,19 +62,17 @@ static VALUE rb_pmapi_pmvalue_inst(VALUE self) {
     return INT2NUM(rb_pmapi_pmvalue_ptr(self)->pm_value.inst);
 }
 
-VALUE rb_pmapi_pmvalue_new(pmValue pm_value, int value_format, int metric_type) {
+VALUE rb_pmapi_pmvalue_new(pmValue pm_value, int value_format) {
     VALUE instance;
-    struct rb_pmapi_pmvalue_wrapper *pm_value_from_instance;
+    pmValueWrapper *pm_value_from_instance;
 
     instance = rb_pmapi_pmvalue_alloc(pcp_pmapi_pmvalue_class);
-    Data_Get_Struct(instance, struct rb_pmapi_pmvalue_wrapper, pm_value_from_instance);
+    Data_Get_Struct(instance, pmValueWrapper, pm_value_from_instance);
 
     /* Copy over the struct into our allocated struct  */
     memcpy(&pm_value_from_instance->pm_value, &pm_value, sizeof(pmValue));
-    pm_value_from_instance->metric_type = metric_type;
     pm_value_from_instance->value_format = value_format;
 
-    rb_iv_set(instance, "@value", rb_pmapi_pmvalue_build(pm_value_from_instance));
 
     return instance;
 }
@@ -112,4 +83,5 @@ void init_rb_pmapi_pmvalue(VALUE pmapi_class) {
     rb_define_alloc_func(pcp_pmapi_pmvalue_class, rb_pmapi_pmvalue_alloc);
     rb_define_method(pcp_pmapi_pmvalue_class, "inst=", rb_pmapi_pmvalue_inst_set, 1);
     rb_define_method(pcp_pmapi_pmvalue_class, "inst", rb_pmapi_pmvalue_inst, 0);
+    rb_define_method(pcp_pmapi_pmvalue_class, "value", value, 0);
 }

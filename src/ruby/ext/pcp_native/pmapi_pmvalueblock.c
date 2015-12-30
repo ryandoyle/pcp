@@ -175,6 +175,18 @@ static VALUE vtype(VALUE self) {
     return UINT2NUM(vtype);
 }
 
+VALUE rb_pmapi_pmvalueblock_new(pmValueBlock *pm_value_block) {
+    pmValueBlockWrapper *pm_valueblock_wrapper = ALLOC(pmValueBlockWrapper);
+    pmValueBlock *wrapped_pm_value_block = (pmValueBlock*)xmalloc(pm_value_block->vlen);
+
+    /* TODO: Wrap original pmValueBlock instead of making a copy */
+    memcpy(wrapped_pm_value_block, pm_value_block, pm_value_block->vlen);
+
+    pm_valueblock_wrapper->pm_value_block_ptr = wrapped_pm_value_block;
+
+    return Data_Wrap_Struct(pcp_pmapi_pmvalueblock_class, 0, rb_pmapi_pmvalueblock_free, pm_valueblock_wrapper);
+}
+
 void init_rb_pmapi_pmvalueblock(VALUE pmapi_class) {
     pcp_pmapi_pmvalueblock_class = rb_define_class_under(pmapi_class, "PmValueBlock", rb_cObject);
 

@@ -3,7 +3,6 @@
 
 #include "pmapi_pmvalueset.h"
 #include "pmapi_pmvalue.h"
-#include "pmapi.h"
 
 VALUE pcp_pmapi_pmvalueset_class = Qnil;
 
@@ -45,21 +44,14 @@ static VALUE rb_pmapi_pmvalueset_valfmt(VALUE self) {
 
 
 static VALUE rb_pmapi_pmvalueset_get_pmvalues(pmValueSet *pm_value_set) {
-    int i, error;
+    int i;
     VALUE pm_values;
-    pmDesc metric_description;
 
     /* Create our array of pmValue(s) */
     pm_values = rb_ary_new2(pm_value_set->numval);
 
-    /* We've got to get the metric description so we know how to decode the result */
-    if((error = pmLookupDesc(pm_value_set->pmid, &metric_description)) < 0 ) {
-        rb_pmapi_raise_error_from_pm_error_code(error);
-        return Qnil;
-    }
-
     for(i = 0; i < pm_value_set->numval; i++) {
-        rb_ary_push(pm_values, rb_pmapi_pmvalue_new(pm_value_set->vlist[i], pm_value_set->valfmt, metric_description.type));
+        rb_ary_push(pm_values, rb_pmapi_pmvalue_new(pm_value_set->vlist[i], pm_value_set->valfmt));
     }
 
     return pm_values;

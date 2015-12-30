@@ -17,7 +17,10 @@ RSpec::Matchers.define :have_the_value do |expected|
       return false
     end
 
-    unless instance.value. == expected
+    # Value could be further in a PmValueBlock class if not INSITU
+    value = vset_for_pmid.valfmt == PCP::PMAPI::PM_VAL_INSITU ? instance.value : instance.value.vbuf
+
+    unless value == expected
       @failure_message << "value '#{instance.value}' does not match expected value '#{expected}' "
       return false
     end
