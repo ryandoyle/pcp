@@ -94,4 +94,30 @@ describe PCP::PMAPI::PmDesc do
     end
   end
 
+  describe 'converting Ruby object to C' do
+    let(:pm_units) { PCP::PMAPI::PmUnits.new(-1,-2,-3,4,5,6) }
+    let(:pm_desc) { described_class.new(123, PCP::PMAPI::PM_TYPE_64, 445566, PCP::PMAPI::PM_SEM_COUNTER, pm_units) }
+
+    it 'should contain the correct pmid' do
+      expect(pmdesc_get_pmid(pm_desc)).to eq 123
+    end
+
+    it 'should contain the correct type' do
+      expect(pmdesc_get_type(pm_desc)).to eq PCP::PMAPI::PM_TYPE_64
+    end
+
+    it 'should contain the correct indom' do
+      expect(pmdesc_get_indom(pm_desc)).to eq 445566
+    end
+
+    it 'should contain the correct semantics' do
+      expect(pmdesc_get_sem(pm_desc)).to eq PCP::PMAPI::PM_SEM_COUNTER
+    end
+
+    it 'should contain the correct units' do
+      expect(pmdesc_get_units_dimSpace(pm_desc)).to eq -1
+    end
+
+  end
+
 end

@@ -6,6 +6,7 @@
 #include "pmapi_pmvalue.h"
 #include "pmapi_pmvalueset.h"
 #include "pmapi_pmunits.h"
+#include "pmapi_pmdesc.h"
 
 VALUE pcp_pmapi_ctest_module = Qnil;
 
@@ -109,6 +110,36 @@ static VALUE pmunits_get_scaleCount(VALUE self, VALUE pm_units_rb) {
     return INT2NUM(pm_units.scaleCount);
 }
 
+static VALUE pmdesc_get_pmid(VALUE self, VALUE pm_desc_rb) {
+    pmDesc *pm_desc = rb_pmapi_pmdesc_ptr(pm_desc_rb);
+
+    return UINT2NUM(pm_desc->pmid);
+}
+
+static VALUE pmdesc_get_type(VALUE self, VALUE pm_desc_rb) {
+    pmDesc *pm_desc = rb_pmapi_pmdesc_ptr(pm_desc_rb);
+
+    return INT2NUM(pm_desc->type);
+}
+
+static VALUE pmdesc_get_indom(VALUE self, VALUE pm_desc_rb) {
+    pmDesc *pm_desc = rb_pmapi_pmdesc_ptr(pm_desc_rb);
+
+    return UINT2NUM(pm_desc->indom);
+}
+
+static VALUE pmdesc_get_sem(VALUE self, VALUE pm_desc_rb) {
+    pmDesc *pm_desc = rb_pmapi_pmdesc_ptr(pm_desc_rb);
+
+    return INT2NUM(pm_desc->sem);
+}
+
+static VALUE pmdesc_get_units_dimSpace(VALUE self, VALUE pm_desc_rb) {
+    pmDesc *pm_desc = rb_pmapi_pmdesc_ptr(pm_desc_rb);
+
+    return INT2NUM(pm_desc->units.dimSpace);
+}
+
 void init_rb_pmapi_ctest(VALUE pmapi_class) {
     pcp_pmapi_ctest_module = rb_define_module_under(pmapi_class, "CTest");
     rb_define_method(pcp_pmapi_ctest_module, "pmvalueblock_get_vbuf", pmvalueblock_get_vbuf, 1);
@@ -130,4 +161,11 @@ void init_rb_pmapi_ctest(VALUE pmapi_class) {
     rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_scaleSpace", pmunits_get_scaleSpace, 1);
     rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_scaleTime", pmunits_get_scaleTime, 1);
     rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_scaleCount", pmunits_get_scaleCount, 1);
+
+    rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_pmid", pmdesc_get_pmid, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_type", pmdesc_get_type, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_indom", pmdesc_get_indom, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_sem", pmdesc_get_sem, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_units_dimSpace", pmdesc_get_units_dimSpace, 1);
+
 }

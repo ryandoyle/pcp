@@ -8,7 +8,7 @@ VALUE pcp_pmapi_pmdesc_class;
 
 
 
-static pmDesc* rb_pmapi_pmdesc_ptr(VALUE self) {
+static pmDesc*pmdesc_ptr(VALUE self) {
     pmDesc *pm_desc;
 
     Data_Get_Struct(self, pmDesc, pm_desc);
@@ -27,7 +27,7 @@ static VALUE rb_pmapi_pmdesc_alloc(VALUE klass) {
 }
 
 static VALUE initialize(VALUE self, VALUE pmid, VALUE type, VALUE indom, VALUE sem, VALUE units) {
-    pmDesc *pm_desc = rb_pmapi_pmdesc_ptr(self);
+    pmDesc *pm_desc = pmdesc_ptr(self);
 
     pm_desc->units = rb_pmapi_pmunits_get(units);
     pm_desc->indom = NUM2UINT(indom);
@@ -38,33 +38,37 @@ static VALUE initialize(VALUE self, VALUE pmid, VALUE type, VALUE indom, VALUE s
     return self;
 }
 
-static VALUE rb_pmapi_pmdesc_pmid(VALUE self) {
-    return UINT2NUM(rb_pmapi_pmdesc_ptr(self)->pmid);
+static VALUE get_pmid(VALUE self) {
+    return UINT2NUM(pmdesc_ptr(self)->pmid);
 }
 
-static VALUE rb_pmapi_pmdesc_type(VALUE self) {
-    return INT2NUM(rb_pmapi_pmdesc_ptr(self)->type);
+static VALUE get_type(VALUE self) {
+    return INT2NUM(pmdesc_ptr(self)->type);
 }
 
-static VALUE rb_pmapi_pmdesc_indom(VALUE self) {
-    return UINT2NUM(rb_pmapi_pmdesc_ptr(self)->indom);
+static VALUE get_indom(VALUE self) {
+    return UINT2NUM(pmdesc_ptr(self)->indom);
 }
 
 
-static VALUE rb_pmapi_pmdesc_sem(VALUE self) {
-    return INT2NUM(rb_pmapi_pmdesc_ptr(self)->sem);
+static VALUE get_sem(VALUE self) {
+    return INT2NUM(pmdesc_ptr(self)->sem);
 }
 
-static VALUE rb_pmapi_pmdesc_units(VALUE self) {
+static VALUE get_units(VALUE self) {
     VALUE pmunits = rb_iv_get(self, "@units");
 
     /* Cache the units object of we haven't created one already */
     if(NIL_P(pmunits)) {
-        pmunits = rb_pmapi_pmunits_new_from_pmdesc(&rb_pmapi_pmdesc_ptr(self)->units, self);
+        pmunits = rb_pmapi_pmunits_new_from_pmdesc(&pmdesc_ptr(self)->units, self);
         rb_iv_set(self, "@units", pmunits);
     }
 
     return pmunits;
+}
+
+pmDesc* rb_pmapi_pmdesc_ptr(VALUE pm_desc) {
+    return pmdesc_ptr(pm_desc);
 }
 
 VALUE rb_pmapi_pmdesc_new(pmDesc pm_desc) {
@@ -82,11 +86,11 @@ void init_rb_pmapi_pmdesc(VALUE pmapi_class) {
 
     pcp_pmapi_pmdesc_class = rb_define_class_under(pmapi_class, "PmDesc", rb_cObject);
     rb_define_method(pcp_pmapi_pmdesc_class, "initialize", initialize, 5);
-    rb_define_method(pcp_pmapi_pmdesc_class, "pmid", rb_pmapi_pmdesc_pmid, 0);
-    rb_define_method(pcp_pmapi_pmdesc_class, "type", rb_pmapi_pmdesc_type, 0);
-    rb_define_method(pcp_pmapi_pmdesc_class, "indom", rb_pmapi_pmdesc_indom, 0);
-    rb_define_method(pcp_pmapi_pmdesc_class, "sem", rb_pmapi_pmdesc_sem, 0);
-    rb_define_method(pcp_pmapi_pmdesc_class, "units", rb_pmapi_pmdesc_units, 0);
+    rb_define_method(pcp_pmapi_pmdesc_class, "pmid", get_pmid, 0);
+    rb_define_method(pcp_pmapi_pmdesc_class, "type", get_type, 0);
+    rb_define_method(pcp_pmapi_pmdesc_class, "indom", get_indom, 0);
+    rb_define_method(pcp_pmapi_pmdesc_class, "sem", get_sem, 0);
+    rb_define_method(pcp_pmapi_pmdesc_class, "units", get_units, 0);
 
     rb_define_alloc_func(pcp_pmapi_pmdesc_class, rb_pmapi_pmdesc_alloc);
 
