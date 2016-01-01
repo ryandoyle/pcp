@@ -114,6 +114,10 @@ static VALUE get_vlist(VALUE self) {
     return vlist;
 }
 
+pmValueSet *rb_pmapi_pmvalueset_ptr(VALUE pm_value_set) {
+    return pmvalueset_ptr(pm_value_set);
+}
+
 VALUE rb_pmapi_pmvalueset_new(pmValueSet *pm_value_set) {
     VALUE instance;
     pmValueSetWrapper *pm_value_set_wrapper;

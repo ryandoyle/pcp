@@ -88,4 +88,32 @@ describe PCP::PMAPI::PmValueSet do
     end
   end
 
+  describe 'going from Ruby object to C' do
+
+    let(:pm_value_set) { described_class.new(123, PCP::PMAPI::PM_VAL_INSITU, [pm_value, pm_value2]) }
+    let(:pm_value) { PCP::PMAPI::PmValue.new(111, 222) }
+    let(:pm_value2) { PCP::PMAPI::PmValue.new(333, 444) }
+
+    it 'should contain the pmid' do
+      expect(pmvalueset_get_pmid(pm_value_set)).to eq 123
+    end
+
+    it 'should contain the value format' do
+      expect(pmvalueset_get_valfmt(pm_value_set)).to eq PCP::PMAPI::PM_VAL_INSITU
+    end
+
+    it 'should contain the number of values' do
+      expect(pmvalueset_get_numval(pm_value_set)).to eq 2
+    end
+
+    it 'should contain the first PmValue' do
+      expect(pmvalueset_get_pmvalue_for_insitu(pm_value_set, 0)).to eq 222
+    end
+
+    it 'should contain the second PmValue' do
+      expect(pmvalueset_get_pmvalue_for_insitu(pm_value_set, 1)).to eq 444
+    end
+
+  end
+
 end
