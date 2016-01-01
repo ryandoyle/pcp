@@ -5,6 +5,7 @@
 #include "pmapi_pmvalueblock.h"
 #include "pmapi_pmvalue.h"
 #include "pmapi_pmvalueset.h"
+#include "pmapi_pmunits.h"
 
 VALUE pcp_pmapi_ctest_module = Qnil;
 
@@ -72,6 +73,42 @@ static VALUE pmvalueset_get_pmvalue_for_insitu(VALUE self, VALUE pm_value_set_rb
     return INT2NUM(pm_value_set->vlist[pmvalue_index].value.lval);
 }
 
+static VALUE pmunits_get_dimSpace(VALUE self, VALUE pm_units_rb) {
+    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+
+    return INT2NUM(pm_units.dimSpace);
+}
+
+static VALUE pmunits_get_dimTime(VALUE self, VALUE pm_units_rb) {
+    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+
+    return INT2NUM(pm_units.dimTime);
+}
+
+static VALUE pmunits_get_dimCount(VALUE self, VALUE pm_units_rb) {
+    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+
+    return INT2NUM(pm_units.dimCount);
+}
+
+static VALUE pmunits_get_scaleSpace(VALUE self, VALUE pm_units_rb) {
+    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+
+    return UINT2NUM(pm_units.scaleSpace);
+}
+
+static VALUE pmunits_get_scaleTime(VALUE self, VALUE pm_units_rb) {
+    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+
+    return UINT2NUM(pm_units.scaleTime);
+}
+
+static VALUE pmunits_get_scaleCount(VALUE self, VALUE pm_units_rb) {
+    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+
+    return INT2NUM(pm_units.scaleCount);
+}
+
 void init_rb_pmapi_ctest(VALUE pmapi_class) {
     pcp_pmapi_ctest_module = rb_define_module_under(pmapi_class, "CTest");
     rb_define_method(pcp_pmapi_ctest_module, "pmvalueblock_get_vbuf", pmvalueblock_get_vbuf, 1);
@@ -86,4 +123,11 @@ void init_rb_pmapi_ctest(VALUE pmapi_class) {
     rb_define_method(pcp_pmapi_ctest_module, "pmvalueset_get_valfmt", pmvalueset_get_valfmt, 1);
     rb_define_method(pcp_pmapi_ctest_module, "pmvalueset_get_numval", pmvalueset_get_numval, 1);
     rb_define_method(pcp_pmapi_ctest_module, "pmvalueset_get_pmvalue_for_insitu", pmvalueset_get_pmvalue_for_insitu, 2);
+
+    rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_dimSpace", pmunits_get_dimSpace, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_dimTime", pmunits_get_dimTime, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_dimCount", pmunits_get_dimCount, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_scaleSpace", pmunits_get_scaleSpace, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_scaleTime", pmunits_get_scaleTime, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmunits_get_scaleCount", pmunits_get_scaleCount, 1);
 }

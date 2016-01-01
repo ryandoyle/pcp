@@ -48,5 +48,32 @@ describe PCP::PMAPI::PmUnits do
     end
   end
 
+  describe 'converting Ruby object to C' do
+    let(:pm_units) { described_class.new(-1,-2,-3,4,5,6) }
+
+    it 'should contain the correct dimSpace' do
+      expect(pmunits_get_dimSpace(pm_units)).to eq -1
+    end
+
+    it 'should contain the correct dimTime' do
+      expect(pmunits_get_dimTime(pm_units)).to eq -2
+    end
+
+    it 'should contain the correct dimCount' do
+      expect(pmunits_get_dimCount(pm_units)).to eq -3
+    end
+
+    it 'should contain the correct scaleSpace' do
+      expect(pmunits_get_scaleSpace(pm_units)).to eq 4
+    end
+
+    it 'should contain the correct scaleTime' do
+      expect(pmunits_get_scaleTime(pm_units)).to eq 5
+    end
+
+    it 'should contain the correct scaleCount' do
+      expect(pmunits_get_scaleCount(pm_units)).to eq 6
+    end
+  end
 
 end
