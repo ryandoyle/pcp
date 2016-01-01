@@ -134,7 +134,7 @@ VALUE rb_pmapi_pmvalueset_new(pmValueSet *pm_value_set) {
 
     instance = Data_Wrap_Struct(pcp_pmapi_pmvalueset_class, 0, pmvalueset_free, pm_value_set_wrapper);
 
-    /* Only copy over pmValueSet and all pmValues */
+    /* Copy over pmValueSet and all pmValues */
     memcpy(pm_value_set_instance, pm_value_set, pm_value_set_size);
 
     return instance;
