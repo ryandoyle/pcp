@@ -22,6 +22,7 @@
 #include "pmapi_pmvalueblock.h"
 #include "pmapi_pmvalueset.h"
 #include "pmapi_ctest.h"
+#include "pmapi_pmresult.h"
 
 VALUE pcp_module = Qnil;
 VALUE pcp_pmapi_class = Qnil;
@@ -625,29 +626,6 @@ static VALUE rb_pmAddProfile(VALUE self, VALUE indom, VALUE instance_identifiers
     return Qnil;
 }
 
-static VALUE build_pm_result_set(pmResult *pm_result) {
-    int i;
-    VALUE pm_value_sets;
-    pm_value_sets = rb_ary_new2(pm_result->numpmid);
-
-    for(i = 0; i < pm_result->numpmid; i++) {
-        rb_ary_push(pm_value_sets, rb_pmapi_pmvalueset_new(pm_result->vset[i]));
-    }
-
-    return pm_value_sets;
-}
-
-static VALUE build_pm_fetch_result(pmResult *pm_result) {
-    VALUE pm_result_hash;
-    pm_result_hash = rb_hash_new();
-
-    rb_hash_aset(pm_result_hash, rb_create_symbol_from_str("numpmid"), INT2NUM(pm_result->numpmid));
-    rb_hash_aset(pm_result_hash, rb_create_symbol_from_str("timestamp"), rb_time_new(pm_result->timestamp.tv_sec, pm_result->timestamp.tv_usec));
-    rb_hash_aset(pm_result_hash, rb_create_symbol_from_str("vset"), build_pm_result_set(pm_result));
-
-    return pm_result_hash;
-}
-
 static VALUE rb_pmFetch(VALUE self, VALUE pmids) {
     int number_of_pmids, i, error;
     pmID *pmidlist;
@@ -669,7 +647,7 @@ static VALUE rb_pmFetch(VALUE self, VALUE pmids) {
         return Qnil;
     }
 
-    result = build_pm_fetch_result(pm_fetch_result);
+    result = rb_pmapi_pmresult_new(pm_fetch_result);
 
     pmFreeResult(pm_fetch_result);
     free(pmidlist);
@@ -689,7 +667,7 @@ static VALUE rb_pmFetchArchive(VALUE self) {
         return Qnil;
     }
 
-    result = build_pm_fetch_result(pm_fetch_archive_result);
+    result = rb_pmapi_pmresult_new(pm_fetch_archive_result);
 
     pmFreeResult(pm_fetch_archive_result);
 
@@ -792,6 +770,7 @@ void Init_pcp_native() {
     init_rb_pmapi_pmvalue(pcp_pmapi_class);
     init_rb_pmapi_pmvalueset(pcp_pmapi_class);
     init_rb_pmapi_pmvalueblock(pcp_pmapi_class);
+    init_rb_pmapi_pmresult(pcp_pmapi_class);
     init_rb_pmapi_ctest(pcp_pmapi_class);
 
     /* Exceptions */

@@ -4,6 +4,7 @@ require 'pcp/pmapi/pmdesc'
 require 'pcp/pmapi/pmvalue'
 require 'pcp/pmapi/pmvalueset'
 require 'pcp/pmapi/pmvalueblock'
+require 'pcp/pmapi/pmresult'
 
 module PCP
   class PMAPI

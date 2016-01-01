@@ -4,7 +4,7 @@ RSpec::Matchers.define :have_the_value do |expected|
   match do |actual|
     @failure_message = ""
 
-    vset_for_pmid = actual[:vset].find { |v| v.pmid == @pmid }
+    vset_for_pmid = actual.vset.find { |v| v.pmid == @pmid }
 
     unless vset_for_pmid
       @failure_message << "no vset with pmid #{@pmid} found "
@@ -456,14 +456,14 @@ describe PCP::PMAPI do
     describe '#pmFetch' do
       describe 'the result structure' do
         it 'has the number of PMIDs in a result' do
-          expect(pmapi.pmFetch([121634820])[:numpmid]).to eql 1
+          expect(pmapi.pmFetch([121634820]).numpmid).to eql 1
         end
 
         it 'has the date that the request was made' do
-          expect(pmapi.pmFetch([121634820])[:timestamp]).to be_kind_of(Time)
+          expect(pmapi.pmFetch([121634820]).timestamp).to be_kind_of(Time)
         end
         it 'has the value set' do
-          expect(pmapi.pmFetch([121634820])[:vset]).to eq [
+          expect(pmapi.pmFetch([121634820]).vset).to eq [
             PCP::PMAPI::PmValueSet.new(121634820, PCP::PMAPI::PM_VAL_INSITU, [
               PCP::PMAPI::PmValue.new(-1, 42 )
             ])
