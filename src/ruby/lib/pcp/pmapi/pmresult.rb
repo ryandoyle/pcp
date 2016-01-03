@@ -8,6 +8,13 @@ module PCP
         "#<#{self.class.name}: timestamp=#{timestamp} numpmid=#{numpmid} vset={vset}>"
       end
 
+      def ==(other)
+        self.class == other.class && \
+        timestamp == other.timestamp && \
+        numpmid == other.numpmid && \
+        vset == other.vset
+      end
+
     end
   end
 end

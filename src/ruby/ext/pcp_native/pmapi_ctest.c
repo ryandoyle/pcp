@@ -7,6 +7,7 @@
 #include "pmapi_pmvalueset.h"
 #include "pmapi_pmunits.h"
 #include "pmapi_pmdesc.h"
+#include "pmapi_pmresult.h"
 
 VALUE pcp_pmapi_ctest_module = Qnil;
 
@@ -140,6 +141,25 @@ static VALUE pmdesc_get_units_dimSpace(VALUE self, VALUE pm_desc_rb) {
     return INT2NUM(pm_desc->units.dimSpace);
 }
 
+static VALUE pmresult_get_timestamp(VALUE self, VALUE pm_result_rb) {
+    pmResult *pm_result = rb_pmapi_pmresult_ptr(pm_result_rb);
+
+    return rb_time_new(pm_result->timestamp.tv_sec, pm_result->timestamp.tv_usec);
+}
+
+static VALUE pmresult_get_numpmid(VALUE self, VALUE pm_result_rb) {
+    pmResult *pm_result = rb_pmapi_pmresult_ptr(pm_result_rb);
+
+    return INT2NUM(pm_result->numpmid);
+}
+
+static VALUE pmresult_get_pmid_for_nth_vset(VALUE self, VALUE pm_result_rb, VALUE vset_index_rb) {
+    int vset_index = NUM2INT(vset_index_rb);
+    pmResult *pm_result = rb_pmapi_pmresult_ptr(pm_result_rb);
+
+    return UINT2NUM(pm_result->vset[vset_index]->pmid);
+}
+
 void init_rb_pmapi_ctest(VALUE pmapi_class) {
     pcp_pmapi_ctest_module = rb_define_module_under(pmapi_class, "CTest");
     rb_define_method(pcp_pmapi_ctest_module, "pmvalueblock_get_vbuf", pmvalueblock_get_vbuf, 1);
@@ -167,5 +187,9 @@ void init_rb_pmapi_ctest(VALUE pmapi_class) {
     rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_indom", pmdesc_get_indom, 1);
     rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_sem", pmdesc_get_sem, 1);
     rb_define_method(pcp_pmapi_ctest_module, "pmdesc_get_units_dimSpace", pmdesc_get_units_dimSpace, 1);
+
+    rb_define_method(pcp_pmapi_ctest_module, "pmresult_get_timestamp", pmresult_get_timestamp, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmresult_get_numpmid", pmresult_get_numpmid, 1);
+    rb_define_method(pcp_pmapi_ctest_module, "pmresult_get_pmid_for_nth_vset", pmresult_get_pmid_for_nth_vset, 2);
 
 }
