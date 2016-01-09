@@ -532,9 +532,30 @@ describe PCP::PMAPI do
     end
 
     describe '#pmGetArchiveLabel' do
-      it 'returns the archive label when used in a pmapi archive context' do
-        expect(pmapi_archive.pmGetArchiveLabel).to include :ll_hostname => 'ryandesktop', :ll_magic => 1342514690, :ll_pid => 28015, :ll_start => kind_of(Time), :ll_tz => 'EST-11'
+
+      let(:pm_archive_label) { pmapi_archive.pmGetArchiveLabel }
+
+      it 'returns a PmArchiveLabel with the correct magic number' do
+        expect(pm_archive_label.ll_magic).to eq 1342514690
       end
+
+      it 'returns a PmArchiveLabel with the correct pid' do
+        expect(pm_archive_label.ll_pid).to eq 28015
+      end
+
+      it 'returns a PmArchiveLabel with the correct start date' do
+        expect(pm_archive_label.ll_start).to be_kind_of(Time)
+      end
+
+      it 'returns a PmArchiveLabel with the correct hostname' do
+        expect(pm_archive_label.ll_hostname).to eq 'ryandesktop'
+      end
+
+      it 'returns a PmArchiveLabel with the correct timezone' do
+        expect(pm_archive_label.ll_tz).to eq 'EST-11'
+      end
+
+
       it 'raises an error if not used in the correct context' do
         expect{pmapi.pmGetArchiveLabel}.to raise_error PCP::PMAPI::NoContextError
       end

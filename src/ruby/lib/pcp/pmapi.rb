@@ -5,6 +5,7 @@ require 'pcp/pmapi/pmvalue'
 require 'pcp/pmapi/pmvalueset'
 require 'pcp/pmapi/pmvalueblock'
 require 'pcp/pmapi/pmresult'
+require 'pcp/pmapi/pmloglabel'
 
 module PCP
   class PMAPI

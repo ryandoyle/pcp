@@ -23,6 +23,7 @@
 #include "pmapi_pmvalueset.h"
 #include "pmapi_ctest.h"
 #include "pmapi_pmresult.h"
+#include "pmapi_pmloglabel.h"
 
 VALUE pcp_module = Qnil;
 VALUE pcp_pmapi_class = Qnil;
@@ -432,10 +433,6 @@ static VALUE rb_pmTraversePMNS(VALUE self, VALUE name) {
     return Qnil;
 }
 
-static VALUE rb_create_symbol_from_str(const char *name) {
-    return ID2SYM(rb_intern(name));
-}
-
 static VALUE rb_pmLookupDesc(VALUE self, VALUE pmid) {
     int error;
     pmDesc pmDesc;
@@ -677,7 +674,6 @@ static VALUE rb_pmFetchArchive(VALUE self) {
 static VALUE rb_pmGetArchiveLabel(VALUE self) {
     int error;
     pmLogLabel pm_log_label;
-    VALUE result;
 
     use_context(self);
 
@@ -686,15 +682,7 @@ static VALUE rb_pmGetArchiveLabel(VALUE self) {
         return Qnil;
     }
 
-    result = rb_hash_new();
-
-    rb_hash_aset(result, rb_create_symbol_from_str("ll_magic"), INT2NUM(pm_log_label.ll_magic));
-    rb_hash_aset(result, rb_create_symbol_from_str("ll_pid"), INT2NUM(pm_log_label.ll_pid));
-    rb_hash_aset(result, rb_create_symbol_from_str("ll_start"), rb_time_new(pm_log_label.ll_start.tv_sec, pm_log_label.ll_start.tv_usec));
-    rb_hash_aset(result, rb_create_symbol_from_str("ll_hostname"), rb_str_new_cstr(pm_log_label.ll_hostname));
-    rb_hash_aset(result, rb_create_symbol_from_str("ll_tz"), rb_str_new_cstr(pm_log_label.ll_tz));
-
-    return result;
+    return rb_pmapi_pmloglabel_new(pm_log_label);
 }
 
 static VALUE rb_pmGetArchiveEnd(VALUE self) {
@@ -771,6 +759,7 @@ void Init_pcp_native() {
     init_rb_pmapi_pmvalueset(pcp_pmapi_class);
     init_rb_pmapi_pmvalueblock(pcp_pmapi_class);
     init_rb_pmapi_pmresult(pcp_pmapi_class);
+    init_rb_pmapi_pmloglabel(pcp_pmapi_class);
     init_rb_pmapi_ctest(pcp_pmapi_class);
 
     /* Exceptions */
