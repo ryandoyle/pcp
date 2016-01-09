@@ -724,16 +724,51 @@ static VALUE rb_pmFreeHighResResult() {
 }
 
 /* call-seq: pmapi.pmExtractValue
- *
- * Not implemented. Values contained in pmResult are returned already converted when
- * returned to the caller.
- *
- * Raises a NotImplementedError if called.
- *
  */
-static VALUE rb_pmExtractValue() {
-    rb_raise(rb_eNotImpError, "pmExtractValue not supported");
-    return Qnil;
+static VALUE rb_pmExtractValue(VALUE self, VALUE value_format_rb, VALUE pm_value_rb, VALUE input_type_rb, VALUE output_type_rb) {
+    pmAtomValue pm_atom_value;
+    int error;
+    int value_format = NUM2INT(value_format_rb);
+    pmValue pm_value = rb_pmapi_pmvalue_ptr(pm_value_rb);
+    int input_type = NUM2INT(input_type_rb);
+    int output_type = NUM2INT(output_type_rb);
+    VALUE result = Qnil;
+
+    if((error = pmExtractValue(value_format, &pm_value, input_type, &pm_atom_value, output_type)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+        return Qnil;
+    }
+
+    switch(output_type) {
+        case PM_TYPE_32:
+            result = INT2NUM(pm_atom_value.l);
+            break;
+        case PM_TYPE_U32:
+            result = UINT2NUM(pm_atom_value.ul);
+            break;
+        case PM_TYPE_64:
+            result = LL2NUM(pm_atom_value.ll);
+            break;
+        case PM_TYPE_U64:
+            result = ULL2NUM(pm_atom_value.ull);
+            break;
+        case PM_TYPE_FLOAT:
+            result = DBL2NUM(pm_atom_value.f);
+            break;
+        case PM_TYPE_DOUBLE:
+            result = DBL2NUM(pm_atom_value.d);
+            break;
+        case PM_TYPE_STRING:
+            result = rb_tainted_str_new_cstr(pm_atom_value.cp);
+            free(pm_atom_value.cp);
+            break;
+        case PM_TYPE_AGGREGATE:
+            free(pm_atom_value.vbp);
+        default:
+            rb_raise(pcp_pmapi_error, "Metric data type %d not supported", output_type);
+    }
+
+    return result;
 }
 
 /* call-seq: pmapi.pmPrintValue
@@ -964,7 +999,7 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmGetArchiveEnd", rb_pmGetArchiveEnd, 0);
     rb_define_method(pcp_pmapi_class, "pmFreeResult", rb_pmFreeResult, 0);
     rb_define_method(pcp_pmapi_class, "pmFreeHighResResult", rb_pmFreeHighResResult, 0);
-    rb_define_method(pcp_pmapi_class, "pmExtractValue", rb_pmExtractValue, 0);
+    rb_define_method(pcp_pmapi_class, "pmExtractValue", rb_pmExtractValue, 4);
     rb_define_method(pcp_pmapi_class, "pmPrintValue", rb_pmPrintValue, 0);
 
 }

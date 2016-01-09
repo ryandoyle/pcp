@@ -583,8 +583,52 @@ describe PCP::PMAPI do
     end
 
     describe '#pmExtractValue' do
-      it 'should raise an error because it is not implemented' do
-        expect{pmapi.pmExtractValue}.to raise_error NotImplementedError
+      it 'should extract the value for a PM_TYPE_32' do
+        pm_value = PCP::PMAPI::PmValue.new(1, -123)
+        extracted_value = pmapi.pmExtractValue(PCP::PMAPI::PM_VAL_INSITU, pm_value, PCP::PMAPI::PM_TYPE_32, PCP::PMAPI::PM_TYPE_32)
+
+        expect(extracted_value).to eq -123
+      end
+      it 'should extract the value for a PM_TYPE_U32' do
+        pm_value = PCP::PMAPI::PmValue.new(1, 123)
+        extracted_value = pmapi.pmExtractValue(PCP::PMAPI::PM_VAL_INSITU, pm_value, PCP::PMAPI::PM_TYPE_U32, PCP::PMAPI::PM_TYPE_U32)
+
+        expect(extracted_value).to eq 123
+      end
+      it 'should extract the value for a PM_TYPE_64' do
+        pm_value_block = PCP::PMAPI::PmValueBlock.new(-123123123123, PCP::PMAPI::PM_TYPE_64)
+        pm_value = PCP::PMAPI::PmValue.new(1, pm_value_block)
+        extracted_value = pmapi.pmExtractValue(PCP::PMAPI::PM_VAL_DPTR, pm_value, PCP::PMAPI::PM_TYPE_64, PCP::PMAPI::PM_TYPE_64)
+
+        expect(extracted_value).to eq -123123123123
+      end
+      it 'should extract the value for a PM_TYPE_U64' do
+        pm_value_block = PCP::PMAPI::PmValueBlock.new(123123123123, PCP::PMAPI::PM_TYPE_U64)
+        pm_value = PCP::PMAPI::PmValue.new(1, pm_value_block)
+        extracted_value = pmapi.pmExtractValue(PCP::PMAPI::PM_VAL_DPTR, pm_value, PCP::PMAPI::PM_TYPE_U64, PCP::PMAPI::PM_TYPE_U64)
+
+        expect(extracted_value).to eq 123123123123
+      end
+      it 'should extract the value for a PM_TYPE_FLOAT' do
+        pm_value_block = PCP::PMAPI::PmValueBlock.new(123.45, PCP::PMAPI::PM_TYPE_FLOAT)
+        pm_value = PCP::PMAPI::PmValue.new(1, pm_value_block)
+        extracted_value = pmapi.pmExtractValue(PCP::PMAPI::PM_VAL_DPTR, pm_value, PCP::PMAPI::PM_TYPE_FLOAT, PCP::PMAPI::PM_TYPE_FLOAT)
+
+        expect(extracted_value).to be_as_close_as_possible_to 123.45
+      end
+      it 'should extract the value for a PM_TYPE_DOUBLE' do
+        pm_value_block = PCP::PMAPI::PmValueBlock.new(123.45, PCP::PMAPI::PM_TYPE_DOUBLE)
+        pm_value = PCP::PMAPI::PmValue.new(1, pm_value_block)
+        extracted_value = pmapi.pmExtractValue(PCP::PMAPI::PM_VAL_DPTR, pm_value, PCP::PMAPI::PM_TYPE_DOUBLE, PCP::PMAPI::PM_TYPE_DOUBLE)
+
+        expect(extracted_value).to eq 123.45
+      end
+      it 'should extract the value for a PM_TYPE_STRING' do
+        pm_value_block = PCP::PMAPI::PmValueBlock.new('hello', PCP::PMAPI::PM_TYPE_STRING)
+        pm_value = PCP::PMAPI::PmValue.new(1, pm_value_block)
+        extracted_value = pmapi.pmExtractValue(PCP::PMAPI::PM_VAL_DPTR, pm_value, PCP::PMAPI::PM_TYPE_STRING, PCP::PMAPI::PM_TYPE_STRING)
+
+        expect(extracted_value).to eq 'hello'
       end
     end
 
