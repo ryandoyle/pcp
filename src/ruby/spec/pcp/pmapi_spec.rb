@@ -686,7 +686,12 @@ describe PCP::PMAPI do
         output_pmunits = PCP::PMAPI::PmUnits.new(0, 0, 1, 0, 0, 2)
 
         expect{pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_STRING, "hello", input_pmunits, output_pmunits)}.to raise_error PCP::PMAPI::Error
+      end
+    end
 
+    describe '#pmSortInstances' do
+      it 'raises an error if called because it is not supported' do
+        expect{pmapi.pmSortInstances}.to raise_error NotImplementedError
       end
     end
 

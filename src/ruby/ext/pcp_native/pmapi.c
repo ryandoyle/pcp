@@ -839,6 +839,11 @@ static VALUE rb_pmConvScale(VALUE self, VALUE pm_type_rb, VALUE value_rb, VALUE 
     return rb_extract_value_from_pmatomvalue(pm_type, output_atom_value, pm_atom_noop_free_pointer);
 }
 
+static VALUE rb_pmSortInstances() {
+    rb_raise(rb_eNotImpError, "pmSortInstances not supported");
+    return Qnil;
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1056,11 +1061,6 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmExtractValue", rb_pmExtractValue, 4);
     rb_define_method(pcp_pmapi_class, "pmPrintValue", rb_pmPrintValue, 0);
     rb_define_method(pcp_pmapi_class, "pmConvScale", rb_pmConvScale, 4);
+    rb_define_method(pcp_pmapi_class, "pmSortInstances", rb_pmSortInstances, 0);
 
 }
-
-
-
-
-
-
