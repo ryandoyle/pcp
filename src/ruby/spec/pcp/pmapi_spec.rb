@@ -638,6 +638,58 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmConvScale' do
+      it 'should convert the scale for PM_TYPE_32' do
+        input_pmunits  = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_KBYTE, 0, 0)
+        output_pmunits = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_BYTE, 0, 0)
+        converted_value = pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_32, -123, input_pmunits, output_pmunits)
+
+        expect(converted_value).to eq -125952
+      end
+      it 'should convert the scale for PM_TYPE_U32' do
+        input_pmunits  = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_KBYTE, 0, 0)
+        output_pmunits = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_BYTE, 0, 0)
+        converted_value = pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_U32, 123, input_pmunits, output_pmunits)
+
+        expect(converted_value).to eq 125952
+      end
+      it 'should convert the scale for PM_TYPE_64' do
+        input_pmunits  = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_KBYTE, 0, 0)
+        output_pmunits = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_BYTE, 0, 0)
+        converted_value = pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_64, -123123123123, input_pmunits, output_pmunits)
+
+        expect(converted_value).to eq -126078078077952
+      end
+      it 'should convert the scale for PM_TYPE_U64' do
+        input_pmunits  = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_KBYTE, 0, 0)
+        output_pmunits = PCP::PMAPI::PmUnits.new(1, 0, 0, PCP::PMAPI::PM_SPACE_BYTE, 0, 0)
+        converted_value = pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_U64, 123123123123, input_pmunits, output_pmunits)
+
+        expect(converted_value).to eq 126078078077952
+      end
+      it 'should convert the scale for PM_TYPE_FLOAT' do
+        input_pmunits  = PCP::PMAPI::PmUnits.new(0, 0, 1, 0, 0, 1)
+        output_pmunits = PCP::PMAPI::PmUnits.new(0, 0, 1, 0, 0, 2)
+        converted_value = pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_FLOAT, 123.45, input_pmunits, output_pmunits)
+
+        expect(converted_value).to be_as_close_as_possible_to 12.345
+      end
+      it 'should convert the scale for PM_TYPE_DOUBLE' do
+        input_pmunits  = PCP::PMAPI::PmUnits.new(0, 0, 1, 0, 0, 1)
+        output_pmunits = PCP::PMAPI::PmUnits.new(0, 0, 1, 0, 0, 2)
+        converted_value = pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_DOUBLE, 123.45, input_pmunits, output_pmunits)
+
+        expect(converted_value).to eq 12.345
+      end
+      it 'should raise an error for unsupported PM_TYPEs' do
+        input_pmunits  = PCP::PMAPI::PmUnits.new(0, 0, 1, 0, 0, 1)
+        output_pmunits = PCP::PMAPI::PmUnits.new(0, 0, 1, 0, 0, 2)
+
+        expect{pmapi.pmConvScale(PCP::PMAPI::PM_TYPE_STRING, "hello", input_pmunits, output_pmunits)}.to raise_error PCP::PMAPI::Error
+
+      end
+    end
+
   end
 
 end

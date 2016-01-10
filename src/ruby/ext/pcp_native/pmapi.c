@@ -723,23 +723,18 @@ static VALUE rb_pmFreeHighResResult() {
     return Qnil;
 }
 
-/* call-seq: pmapi.pmExtractValue
- */
-static VALUE rb_pmExtractValue(VALUE self, VALUE value_format_rb, VALUE pm_value_rb, VALUE input_type_rb, VALUE output_type_rb) {
-    pmAtomValue pm_atom_value;
-    int error;
-    int value_format = NUM2INT(value_format_rb);
-    pmValue pm_value = rb_pmapi_pmvalue_ptr(pm_value_rb);
-    int input_type = NUM2INT(input_type_rb);
-    int output_type = NUM2INT(output_type_rb);
+static void pm_atom_free_pointer(void *freeable) {
+    free(freeable);
+}
+
+static void pm_atom_noop_free_pointer(void *freeable) {
+    (void)freeable;
+}
+
+static VALUE rb_extract_value_from_pmatomvalue(int pm_type, pmAtomValue pm_atom_value,  void(*pm_atom_free_function)(void *)) {
     VALUE result = Qnil;
 
-    if((error = pmExtractValue(value_format, &pm_value, input_type, &pm_atom_value, output_type)) < 0) {
-        rb_pmapi_raise_error_from_pm_error_code(error);
-        return Qnil;
-    }
-
-    switch(output_type) {
+    switch(pm_type) {
         case PM_TYPE_32:
             result = INT2NUM(pm_atom_value.l);
             break;
@@ -760,15 +755,35 @@ static VALUE rb_pmExtractValue(VALUE self, VALUE value_format_rb, VALUE pm_value
             break;
         case PM_TYPE_STRING:
             result = rb_tainted_str_new_cstr(pm_atom_value.cp);
-            free(pm_atom_value.cp);
+            /* Some usages of extracting values from value blocks don't require freeing memory. Allow the caller
+             * to pass in their own version of a freeing function and call that instead */
+            pm_atom_free_function(pm_atom_value.cp);
             break;
         case PM_TYPE_AGGREGATE:
-            free(pm_atom_value.vbp);
+            pm_atom_free_function(pm_atom_value.vbp);
         default:
-            rb_raise(pcp_pmapi_error, "Metric data type %d not supported", output_type);
+            rb_raise(pcp_pmapi_error, "Metric data type %d not supported", pm_type);
     }
 
     return result;
+}
+
+/* call-seq: pmapi.pmExtractValue
+ */
+static VALUE rb_pmExtractValue(VALUE self, VALUE value_format_rb, VALUE pm_value_rb, VALUE input_type_rb, VALUE output_type_rb) {
+    pmAtomValue pm_atom_value;
+    int error;
+    int value_format = NUM2INT(value_format_rb);
+    pmValue pm_value = rb_pmapi_pmvalue_ptr(pm_value_rb);
+    int input_type = NUM2INT(input_type_rb);
+    int output_type = NUM2INT(output_type_rb);
+
+    if((error = pmExtractValue(value_format, &pm_value, input_type, &pm_atom_value, output_type)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+        return Qnil;
+    }
+
+    return rb_extract_value_from_pmatomvalue(output_type, pm_atom_value, pm_atom_free_pointer);
 }
 
 /* call-seq: pmapi.pmPrintValue
@@ -784,6 +799,45 @@ static VALUE rb_pmPrintValue() {
     return Qnil;
 }
 
+static VALUE rb_pmConvScale(VALUE self, VALUE pm_type_rb, VALUE value_rb, VALUE input_pmunits_rb, VALUE output_pmunits_rb) {
+    int error;
+    int pm_type = NUM2INT(pm_type_rb);
+    pmAtomValue input_atom_value;
+    pmAtomValue output_atom_value;
+    pmUnits input_pm_units = rb_pmapi_pmunits_get(input_pmunits_rb);
+    pmUnits output_pm_units = rb_pmapi_pmunits_get(output_pmunits_rb);
+
+    switch (pm_type) {
+        case PM_TYPE_32:
+            input_atom_value.l = NUM2INT(value_rb);
+            break;
+        case PM_TYPE_U32:
+            input_atom_value.ul = NUM2UINT(value_rb);
+            break;
+        case PM_TYPE_64:
+            input_atom_value.ll = NUM2LL(value_rb);
+            break;
+        case PM_TYPE_U64:
+            input_atom_value.ull = NUM2ULL(value_rb);
+            break;
+        case PM_TYPE_FLOAT:
+            input_atom_value.f = (float)NUM2DBL(value_rb);
+            break;
+        case PM_TYPE_DOUBLE:
+            input_atom_value.d = NUM2DBL(value_rb);
+            break;
+        default:
+            rb_raise(pcp_pmapi_error, "Metric data type %d not supported", pm_type);
+            break;
+    }
+
+    if((error = pmConvScale(pm_type, &input_atom_value, &input_pm_units, &output_atom_value, &output_pm_units)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+        return Qnil;
+    }
+
+    return rb_extract_value_from_pmatomvalue(pm_type, output_atom_value, pm_atom_noop_free_pointer);
+}
 
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
@@ -1001,6 +1055,7 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmFreeHighResResult", rb_pmFreeHighResResult, 0);
     rb_define_method(pcp_pmapi_class, "pmExtractValue", rb_pmExtractValue, 4);
     rb_define_method(pcp_pmapi_class, "pmPrintValue", rb_pmPrintValue, 0);
+    rb_define_method(pcp_pmapi_class, "pmConvScale", rb_pmConvScale, 4);
 
 }
 
