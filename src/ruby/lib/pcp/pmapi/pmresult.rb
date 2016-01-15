@@ -5,7 +5,7 @@ module PCP
     class PmResult
 
       def inspect
-        "#<#{self.class.name}: timestamp=#{timestamp} numpmid=#{numpmid} vset={vset}>"
+        "#<#{self.class.name}: timestamp=#{timestamp} numpmid=#{numpmid} vset=#{vset}>"
       end
 
       def ==(other)

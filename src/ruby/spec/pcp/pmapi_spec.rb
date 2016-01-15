@@ -519,6 +519,22 @@ describe PCP::PMAPI do
         end
       end
 
+      describe 'querying unknown PMIDs' do
+        it 'get feedback on how we should error in the case of unknown/error PMIDs'
+        it 'does not initially raise an error' do
+          expect{pmapi.pmFetch([123])}.to_not raise_error
+        end
+        it 'does not raise an error for #pmid as it is still valid' do
+          expect{pmapi.pmFetch([123])}.to_not raise_error
+        end
+        it 'numval contains the error' do
+          expect(pmapi.pmFetch([123]).vset[0].numval).to eq PCP::PMAPI::PM_ERR_NOAGENT
+        end
+        it 'raises an error when trying to get the vlist for unknown PMIDs' do
+          expect{pmapi.pmFetch([123]).vset[0].vlist}.to raise_error PCP::PMAPI::NoAgentError
+        end
+      end
+
       it 'might need to support other types like PM_TYPE_EVENT etc...'
 
     end

@@ -639,10 +639,11 @@ static VALUE rb_pmFetch(VALUE self, VALUE pmids) {
     }
 
     if((error = pmFetch(number_of_pmids, pmidlist, &pm_fetch_result)) < 0) {
-        rb_pmapi_raise_error_from_pm_error_code(error);
         free(pmidlist);
+        rb_pmapi_raise_error_from_pm_error_code(error);
         return Qnil;
     }
+
 
     result = rb_pmapi_pmresult_new(pm_fetch_result);
 
