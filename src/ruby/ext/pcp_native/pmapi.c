@@ -82,6 +82,17 @@ VALUE pcp_pmapi_pmda_ready_error = Qnil;
 VALUE pcp_pmapi_pmda_not_ready_error = Qnil;
 VALUE pcp_pmapi_nyi_error = Qnil;
 
+static const struct pm_mode_to_string {
+    int pm_mode;
+    const char *string;
+} pm_mode_to_string_map[] = {
+    {PM_MODE_LIVE, "PM_MODE_LIVE"},
+    {PM_MODE_INTERP, "PM_MODE_INTERP"},
+    {PM_MODE_FORW, "PM_MODE_FORW"},
+    {PM_MODE_BACK, "PM_MODE_BACK"},
+    {-1, "UNKNOWN"},
+};
+
 static const struct pmapi_to_ruby_exception {
     int pmapi_error;
     VALUE *ruby_exception;
@@ -168,6 +179,19 @@ static int get_context(VALUE self) {
 
 static void use_context(VALUE self) {
     pmUseContext(get_context(self));
+}
+
+static const char* get_pm_mode_string_from_value(int pm_mode) {
+    int i, number_of_pm_modes;
+    number_of_pm_modes = sizeof(pm_mode_to_string_map) / sizeof(struct pm_mode_to_string);
+
+    for(i=0; i < number_of_pm_modes; i++) {
+        if(pm_mode_to_string_map[i].pm_mode == pm_mode) {
+            return pm_mode_to_string_map[i].string;
+        }
+    }
+    /* Last element is a value of "UNKNOWN" */
+    return pm_mode_to_string_map[number_of_pm_modes-1].string;
 }
 
 static VALUE get_exception_from_pmapi_error_code(int error_code) {
@@ -845,6 +869,38 @@ static VALUE rb_pmSortInstances() {
     return Qnil;
 }
 
+static VALUE rb_pmSetMode(int argc, VALUE *argv, VALUE self) {
+    VALUE pm_mode_rb;
+    VALUE time_rb;
+    VALUE delta_rb;
+    VALUE pm_time_rb;
+    int pm_mode, delta, error;
+    struct timeval time;
+
+    rb_scan_args(argc, argv, "31", &pm_mode_rb, &time_rb, &delta_rb ,&pm_time_rb);
+
+    pm_mode = NUM2INT(pm_mode_rb);
+    time = rb_time_timeval(time_rb);
+    delta = NUM2INT(delta_rb);
+
+    if(!NIL_P(pm_time_rb)) {
+        /* Passing in a PM_TIME_* only applies for PM_MODE_INTERP */
+        if(pm_mode != PM_MODE_INTERP) {
+            rb_raise(rb_eArgError, "Setting time mode not supported for %s", get_pm_mode_string_from_value(pm_mode));
+            return Qnil;
+        }
+        pm_mode |= PM_XTB_SET(NUM2INT(pm_time_rb));
+    }
+
+    use_context(self);
+
+    if((error = pmSetMode(pm_mode, &time, delta)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+    }
+
+    return Qnil;
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1026,6 +1082,11 @@ void Init_pcp_native() {
     rb_define_const(pcp_pmapi_class, "PM_INDOM_NULL", UINT2NUM(PM_INDOM_NULL));
     rb_define_const(pcp_pmapi_class, "PM_IN_NULL", INT2NUM(PM_IN_NULL));
 
+    rb_define_const(pcp_pmapi_class, "PM_MODE_LIVE", INT2NUM(PM_MODE_LIVE));
+    rb_define_const(pcp_pmapi_class, "PM_MODE_INTERP", INT2NUM(PM_MODE_INTERP));
+    rb_define_const(pcp_pmapi_class, "PM_MODE_FORW", INT2NUM(PM_MODE_FORW));
+    rb_define_const(pcp_pmapi_class, "PM_MODE_BACK", INT2NUM(PM_MODE_BACK));
+
     rb_define_alloc_func(pcp_pmapi_class, allocate);
     rb_define_private_method(pcp_pmapi_class, "pmNewContext", rb_pmNewContext, 2);
     rb_define_method(pcp_pmapi_class, "pmGetContextHostName", rb_pmGetContextHostName, 0);
@@ -1063,5 +1124,6 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmPrintValue", rb_pmPrintValue, 0);
     rb_define_method(pcp_pmapi_class, "pmConvScale", rb_pmConvScale, 4);
     rb_define_method(pcp_pmapi_class, "pmSortInstances", rb_pmSortInstances, 0);
+    rb_define_method(pcp_pmapi_class, "pmSetMode", rb_pmSetMode, -1);
 
 }

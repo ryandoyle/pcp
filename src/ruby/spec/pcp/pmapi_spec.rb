@@ -156,6 +156,11 @@ describe PCP::PMAPI do
 
       PCP::PMAPI::PMNS_LEAF_STATUS,
       PCP::PMAPI::PMNS_NONLEAF_STATUS,
+
+      PCP::PMAPI::PM_MODE_LIVE,
+      PCP::PMAPI::PM_MODE_INTERP,
+      PCP::PMAPI::PM_MODE_FORW,
+      PCP::PMAPI::PM_MODE_BACK,
     ].each do |constant|
       it "should be numeric" do
         expect(constant).to be_a_kind_of Integer
@@ -708,6 +713,24 @@ describe PCP::PMAPI do
     describe '#pmSortInstances' do
       it 'raises an error if called because it is not supported' do
         expect{pmapi.pmSortInstances}.to raise_error NotImplementedError
+      end
+    end
+
+    describe '#pmSetMode' do
+      it 'sets the mode for a live context' do
+        expect{pmapi.pmSetMode(PCP::PMAPI::PM_MODE_LIVE, Time.now, 10)}.to_not raise_error
+      end
+      it 'sets the mode for an archive context' do
+        expect{pmapi_archive.pmSetMode(PCP::PMAPI::PM_MODE_FORW, Time.now, 10)}.to_not raise_error
+      end
+      it 'raises an error if a PM_TIME value is passed for a non-PM_MODE_INTERP mode' do
+        expect{pmapi_archive.pmSetMode(PCP::PMAPI::PM_MODE_BACK, Time.now, 10, PCP::PMAPI::PM_TIME_SEC)}.to raise_error ArgumentError
+      end
+      it 'does not raise an error if using PM_MODE_INTERP and setting a PM_TIME' do
+        expect{pmapi_archive.pmSetMode(PCP::PMAPI::PM_MODE_INTERP, Time.now, 10, PCP::PMAPI::PM_TIME_SEC)}.to_not raise_error
+      end
+      it 'supports setting PM_MODE_INTERP without a PM_TIME' do
+        expect{pmapi_archive.pmSetMode(PCP::PMAPI::PM_MODE_INTERP, Time.now, 10)}.to_not raise_error
       end
     end
 
