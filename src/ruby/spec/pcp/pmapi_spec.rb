@@ -748,6 +748,19 @@ describe PCP::PMAPI do
 
     end
 
+    describe '#pmLookupText' do
+      it 'returns a one line description of the metric if asked to provide a one line description' do
+        expect(pmapi.pmLookupText(121634896, PCP::PMAPI::PM_TEXT_ONELINE)).to eq "variable sized instance domain"
+      end
+      it 'returns a longer description of the metric if asked to provide help text' do
+        expected = "store a value in sample.many.count to change the number of instances\nthat appear in sample.many.int's instance domain"
+        expect(pmapi.pmLookupText(121634896, PCP::PMAPI::PM_TEXT_HELP)).to eq expected
+      end
+      it 'raises an error for unknown metrics' do
+        expect{pmapi.pmLookupText(123, PCP::PMAPI::PM_TEXT_HELP)}.to raise_error PCP::PMAPI::PMIDError
+      end
+    end
+
   end
 
 end

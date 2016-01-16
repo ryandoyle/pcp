@@ -916,6 +916,28 @@ static VALUE rb_pmStore(VALUE self, VALUE pm_result_rb) {
     return Qnil;
 }
 
+static VALUE rb_pmLookupText(VALUE self, VALUE pmid_rb, VALUE pm_text_type_rb) {
+    pmID pmid;
+    int pm_text_type, error;
+    char *result_buffer;
+    VALUE result;
+
+    use_context(self);
+
+    pmid = NUM2UINT(pmid_rb);
+    pm_text_type = NUM2INT(pm_text_type_rb);
+
+    if((error = pmLookupText(pmid, pm_text_type, &result_buffer)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+        return Qnil;
+    }
+
+    result = rb_tainted_str_new_cstr(result_buffer);
+    free(result_buffer);
+
+    return result;
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1102,6 +1124,9 @@ void Init_pcp_native() {
     rb_define_const(pcp_pmapi_class, "PM_MODE_FORW", INT2NUM(PM_MODE_FORW));
     rb_define_const(pcp_pmapi_class, "PM_MODE_BACK", INT2NUM(PM_MODE_BACK));
 
+    rb_define_const(pcp_pmapi_class, "PM_TEXT_ONELINE", INT2NUM(PM_TEXT_ONELINE));
+    rb_define_const(pcp_pmapi_class, "PM_TEXT_HELP", INT2NUM(PM_TEXT_HELP));
+
     rb_define_alloc_func(pcp_pmapi_class, allocate);
     rb_define_private_method(pcp_pmapi_class, "pmNewContext", rb_pmNewContext, 2);
     rb_define_method(pcp_pmapi_class, "pmGetContextHostName", rb_pmGetContextHostName, 0);
@@ -1141,5 +1166,6 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmSortInstances", rb_pmSortInstances, 0);
     rb_define_method(pcp_pmapi_class, "pmSetMode", rb_pmSetMode, -1);
     rb_define_method(pcp_pmapi_class, "pmStore", rb_pmStore, 1);
+    rb_define_method(pcp_pmapi_class, "pmLookupText", rb_pmLookupText, 2);
 
 }
