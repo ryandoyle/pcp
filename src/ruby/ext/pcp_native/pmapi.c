@@ -938,6 +938,28 @@ static VALUE rb_pmLookupText(VALUE self, VALUE pmid_rb, VALUE pm_text_type_rb) {
     return result;
 }
 
+static VALUE rb_pmLookupInDomText(VALUE self, VALUE indom_rb, VALUE pm_text_type_rb) {
+    pmInDom indom;
+    int pm_text_type, error;
+    char *result_buffer;
+    VALUE result;
+
+    use_context(self);
+
+    indom = NUM2UINT(indom_rb);
+    pm_text_type = NUM2INT(pm_text_type_rb);
+
+    if((error = pmLookupInDomText(indom, pm_text_type, &result_buffer)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+        return Qnil;
+    }
+
+    result = rb_tainted_str_new_cstr(result_buffer);
+    free(result_buffer);
+
+    return result;
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1167,5 +1189,6 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmSetMode", rb_pmSetMode, -1);
     rb_define_method(pcp_pmapi_class, "pmStore", rb_pmStore, 1);
     rb_define_method(pcp_pmapi_class, "pmLookupText", rb_pmLookupText, 2);
+    rb_define_method(pcp_pmapi_class, "pmLookupInDomText", rb_pmLookupInDomText, 2);
 
 }

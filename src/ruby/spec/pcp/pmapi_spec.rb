@@ -761,6 +761,22 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmLookupInDomText' do
+      let(:sample_colour_indom) { 121634817 }
+
+      it 'returns a one line description of the instance domain  if asked to provide a one line description' do
+        expected = "Instance domain \"colour\" for sample PMDA"
+        expect(pmapi.pmLookupInDomText(sample_colour_indom, PCP::PMAPI::PM_TEXT_ONELINE)).to eq expected
+      end
+      it 'returns a longer description of the instance domain if asked to provide help text' do
+        expected = "Universally 3 instances, \"red\" (0), \"green\" (1) and \"blue\" (3)."
+        expect(pmapi.pmLookupInDomText(sample_colour_indom, PCP::PMAPI::PM_TEXT_HELP)).to eq expected
+      end
+      it 'raises an error for unknown instance domains' do
+        expect{pmapi.pmLookupInDomText(123, PCP::PMAPI::PM_TEXT_HELP)}.to raise_error PCP::PMAPI::PMIDError
+      end
+    end
+
   end
 
 end
