@@ -734,6 +734,20 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmStore' do
+
+      let(:pm_result) { PCP::PMAPI::PmResult.new(Time.now, [vset]) }
+      let(:vset) { PCP::PMAPI::PmValueSet.new(121634820, PCP::PMAPI::PM_VAL_INSITU, [pm_value]) }
+      let(:pm_value) { PCP::PMAPI::PmValue.new(PCP::PMAPI::PM_IN_NULL,444) }
+
+      it 'raises an error if there is no permission to store the value' do
+        expect{pmapi.pmStore(pm_result)}.to raise_error PCP::PMAPI::PermissionError
+      end
+
+      it 'may require further testing to validate that a store is done correctly'
+
+    end
+
   end
 
 end

@@ -901,6 +901,21 @@ static VALUE rb_pmSetMode(int argc, VALUE *argv, VALUE self) {
     return Qnil;
 }
 
+static VALUE rb_pmStore(VALUE self, VALUE pm_result_rb) {
+    const pmResult *pm_result;
+    int error;
+
+    use_context(self);
+
+    pm_result = rb_pmapi_pmresult_ptr(pm_result_rb);
+
+    if((error = pmStore(pm_result)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+    }
+
+    return Qnil;
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1125,5 +1140,6 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmConvScale", rb_pmConvScale, 4);
     rb_define_method(pcp_pmapi_class, "pmSortInstances", rb_pmSortInstances, 0);
     rb_define_method(pcp_pmapi_class, "pmSetMode", rb_pmSetMode, -1);
+    rb_define_method(pcp_pmapi_class, "pmStore", rb_pmStore, 1);
 
 }
