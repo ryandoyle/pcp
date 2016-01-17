@@ -795,6 +795,15 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmTypeStr' do
+      it 'returns a string of the PM_TYPE for an instance of pmapi' do
+        expect(pmapi.pmTypeStr(PCP::PMAPI::PM_TYPE_U64)).to eq 'U64'
+      end
+      it 'returns a string of the PM_TYPE for the class method' do
+        expect(described_class.pmTypeStr(PCP::PMAPI::PM_TYPE_U64)).to eq 'U64'
+      end
+    end
+
   end
 
 end
