@@ -24,6 +24,7 @@ module PCP
     alias_method :pmLoadASCIINameSpace, :pmLoadNameSpace
 
     def_delegator self, :pmIDStr
+    def_delegator self, :pmInDomStr
 
   end
 end

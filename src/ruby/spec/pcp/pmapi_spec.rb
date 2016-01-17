@@ -786,6 +786,15 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmInDomStr' do
+      it 'returns the instance domain as a string for an instance of pmapi' do
+        expect(pmapi.pmInDomStr(123123123)).to eq "29.1488307"
+      end
+      it 'returns the instance domain as a string for the class method' do
+        expect(described_class.pmInDomStr(123123123)).to eq "29.1488307"
+      end
+    end
+
   end
 
 end

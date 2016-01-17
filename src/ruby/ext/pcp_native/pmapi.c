@@ -971,6 +971,17 @@ static VALUE rb_pmIDStr(VALUE self, VALUE pmid_rb) {
     return rb_tainted_str_new_cstr(result_buffer);
 }
 
+static VALUE rb_pmInDomStr(VALUE self, VALUE indom_rb) {
+    pmInDom indom;
+    char result_buffer[20];
+
+    indom = NUM2UINT(indom_rb);
+
+    pmInDomStr_r(indom, result_buffer, sizeof(result_buffer));
+
+    return rb_tainted_str_new_cstr(result_buffer);
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1202,5 +1213,6 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmLookupText", rb_pmLookupText, 2);
     rb_define_method(pcp_pmapi_class, "pmLookupInDomText", rb_pmLookupInDomText, 2);
     rb_define_singleton_method(pcp_pmapi_class, "pmIDStr", rb_pmIDStr, 1);
+    rb_define_singleton_method(pcp_pmapi_class, "pmInDomStr", rb_pmInDomStr, 1);
 
 }
