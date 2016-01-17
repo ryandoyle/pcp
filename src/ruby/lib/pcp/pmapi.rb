@@ -1,3 +1,5 @@
+require 'forwardable'
+
 require 'pcp_native'
 require 'pcp/pmapi/pmunits'
 require 'pcp/pmapi/pmdesc'
@@ -10,6 +12,8 @@ require 'pcp/pmapi/pmloglabel'
 module PCP
   class PMAPI
 
+    extend Forwardable
+
     def initialize(metric_source, metric_source_argument)
       unless(metric_source_argument.class == String || metric_source_argument == nil)
         raise TypeError, 'Metric source argument should be String or Nil' unless metric_source_argument
@@ -18,6 +22,8 @@ module PCP
     end
 
     alias_method :pmLoadASCIINameSpace, :pmLoadNameSpace
+
+    def_delegator self, :pmIDStr
 
   end
 end

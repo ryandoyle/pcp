@@ -777,6 +777,15 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmIDStr' do
+      it 'returns the dot delimited string of the PMID for an instance of pmapi' do
+        expect(pmapi.pmIDStr(123123)).to eq "0.120.243"
+      end
+      it 'returns the dot delimited string of the PMID for the class method' do
+        expect(described_class.pmIDStr(123123)).to eq "0.120.243"
+      end
+    end
+
   end
 
 end
