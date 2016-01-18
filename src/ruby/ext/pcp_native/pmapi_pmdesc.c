@@ -28,12 +28,13 @@ static VALUE rb_pmapi_pmdesc_alloc(VALUE klass) {
 
 static VALUE initialize(VALUE self, VALUE pmid, VALUE type, VALUE indom, VALUE sem, VALUE units) {
     pmDesc *pm_desc = pmdesc_ptr(self);
+    pmUnits *pm_units = rb_pmapi_pmunits_ptr(units);
 
-    pm_desc->units = rb_pmapi_pmunits_get(units);
     pm_desc->indom = NUM2UINT(indom);
     pm_desc->pmid = NUM2UINT(pmid);
     pm_desc->sem = NUM2INT(sem);
     pm_desc->type = NUM2INT(type);
+    memcpy(&pm_desc->units, pm_units, sizeof(pmUnits));
 
     return self;
 }

@@ -76,39 +76,39 @@ static VALUE pmvalueset_get_pmvalue_for_insitu(VALUE self, VALUE pm_value_set_rb
 }
 
 static VALUE pmunits_get_dimSpace(VALUE self, VALUE pm_units_rb) {
-    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+    pmUnits *pm_units = rb_pmapi_pmunits_ptr(pm_units_rb);
 
-    return INT2NUM(pm_units.dimSpace);
+    return INT2NUM(pm_units->dimSpace);
 }
 
 static VALUE pmunits_get_dimTime(VALUE self, VALUE pm_units_rb) {
-    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+    pmUnits *pm_units = rb_pmapi_pmunits_ptr(pm_units_rb);
 
-    return INT2NUM(pm_units.dimTime);
+    return INT2NUM(pm_units->dimTime);
 }
 
 static VALUE pmunits_get_dimCount(VALUE self, VALUE pm_units_rb) {
-    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+    pmUnits *pm_units = rb_pmapi_pmunits_ptr(pm_units_rb);
 
-    return INT2NUM(pm_units.dimCount);
+    return INT2NUM(pm_units->dimCount);
 }
 
 static VALUE pmunits_get_scaleSpace(VALUE self, VALUE pm_units_rb) {
-    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+    pmUnits *pm_units = rb_pmapi_pmunits_ptr(pm_units_rb);
 
-    return UINT2NUM(pm_units.scaleSpace);
+    return UINT2NUM(pm_units->scaleSpace);
 }
 
 static VALUE pmunits_get_scaleTime(VALUE self, VALUE pm_units_rb) {
-    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+    pmUnits *pm_units = rb_pmapi_pmunits_ptr(pm_units_rb);
 
-    return UINT2NUM(pm_units.scaleTime);
+    return UINT2NUM(pm_units->scaleTime);
 }
 
 static VALUE pmunits_get_scaleCount(VALUE self, VALUE pm_units_rb) {
-    pmUnits pm_units = rb_pmapi_pmunits_get(pm_units_rb);
+    pmUnits *pm_units = rb_pmapi_pmunits_ptr(pm_units_rb);
 
-    return INT2NUM(pm_units.scaleCount);
+    return INT2NUM(pm_units->scaleCount);
 }
 
 static VALUE pmdesc_get_pmid(VALUE self, VALUE pm_desc_rb) {

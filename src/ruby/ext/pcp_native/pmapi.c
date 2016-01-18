@@ -829,8 +829,8 @@ static VALUE rb_pmConvScale(VALUE self, VALUE pm_type_rb, VALUE value_rb, VALUE 
     int pm_type = NUM2INT(pm_type_rb);
     pmAtomValue input_atom_value;
     pmAtomValue output_atom_value;
-    pmUnits input_pm_units = rb_pmapi_pmunits_get(input_pmunits_rb);
-    pmUnits output_pm_units = rb_pmapi_pmunits_get(output_pmunits_rb);
+    pmUnits *input_pm_units = rb_pmapi_pmunits_ptr(input_pmunits_rb);
+    pmUnits *output_pm_units = rb_pmapi_pmunits_ptr(output_pmunits_rb);
 
     switch (pm_type) {
         case PM_TYPE_32:
@@ -856,7 +856,7 @@ static VALUE rb_pmConvScale(VALUE self, VALUE pm_type_rb, VALUE value_rb, VALUE 
             break;
     }
 
-    if((error = pmConvScale(pm_type, &input_atom_value, &input_pm_units, &output_atom_value, &output_pm_units)) < 0) {
+    if((error = pmConvScale(pm_type, &input_atom_value, input_pm_units, &output_atom_value, output_pm_units)) < 0) {
         rb_pmapi_raise_error_from_pm_error_code(error);
         return Qnil;
     }

@@ -16,7 +16,7 @@ static VALUE rb_pmapi_pmunits_alloc(VALUE klass) {
     return Data_Wrap_Struct(klass, 0, rb_pmapi_pmunits_free, units_to_wrap);
 }
 
-static pmUnits* rb_pmapi_pmunits_ptr(VALUE self) {
+pmUnits* rb_pmapi_pmunits_ptr(VALUE self) {
     pmUnits *pm_units;
 
     Data_Get_Struct(self, pmUnits, pm_units);
@@ -70,14 +70,6 @@ VALUE rb_pmapi_pmunits_new_from_pmdesc(pmUnits *pm_units, VALUE pm_desc) {
     rb_iv_set(instance, "@pmdesc", pm_desc);
 
     return instance;
-}
-
-pmUnits rb_pmapi_pmunits_get(VALUE self) {
-    pmUnits pm_units;
-
-    memcpy(&pm_units, rb_pmapi_pmunits_ptr(self), sizeof(pmUnits));
-
-    return pm_units;
 }
 
 void init_rb_pmapi_pmunits(VALUE pmapi_class) {
