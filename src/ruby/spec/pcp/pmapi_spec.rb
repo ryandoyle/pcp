@@ -804,6 +804,17 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmUnitsStr' do
+      let(:pm_units) { PCP::PMAPI::PmUnits.new(1,0,0,PCP::PMAPI::PM_SPACE_MBYTE,0,0) }
+
+      it 'returns the string of the pmUnits for an instance of pmapi' do
+        expect(pmapi.pmUnitsStr(pm_units)).to eq "Mbyte"
+      end
+      it 'returns the string of the pmUnits for the class method' do
+        expect(described_class.pmUnitsStr(pm_units)).to eq "Mbyte"
+      end
+    end
+
   end
 
 end
