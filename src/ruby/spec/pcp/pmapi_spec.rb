@@ -815,6 +815,15 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmAtomStr' do
+      it 'returns a string for the atom value for an instance of pmapi' do
+        expect(pmapi.pmAtomStr(-123, PCP::PMAPI::PM_TYPE_32)).to eq '-123'
+      end
+      it 'returns a string for the atom value for the class method' do
+        expect(described_class.pmAtomStr(-123, PCP::PMAPI::PM_TYPE_32)).to eq '-123'
+      end
+    end
+
   end
 
 end

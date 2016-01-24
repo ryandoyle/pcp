@@ -27,6 +27,7 @@ module PCP
     def_delegator self, :pmInDomStr
     def_delegator self, :pmTypeStr
     def_delegator self, :pmUnitsStr
+    def_delegator self, :pmAtomStr
 
   end
 end

@@ -824,6 +824,39 @@ static VALUE rb_pmPrintValue() {
     return Qnil;
 }
 
+static pmAtomValue rb_build_pmatomvalue(int pm_type, VALUE value_rb) {
+    pmAtomValue atom_value;
+
+    switch (pm_type) {
+        case PM_TYPE_32:
+            atom_value.l = NUM2INT(value_rb);
+            break;
+        case PM_TYPE_U32:
+            atom_value.ul = NUM2UINT(value_rb);
+            break;
+        case PM_TYPE_64:
+            atom_value.ll = NUM2LL(value_rb);
+            break;
+        case PM_TYPE_U64:
+            atom_value.ull = NUM2ULL(value_rb);
+            break;
+        case PM_TYPE_FLOAT:
+            atom_value.f = (float)NUM2DBL(value_rb);
+            break;
+        case PM_TYPE_DOUBLE:
+            atom_value.d = NUM2DBL(value_rb);
+            break;
+        case PM_TYPE_STRING:
+            atom_value.cp = StringValueCStr(value_rb);
+            break;
+        default:
+            rb_raise(pcp_pmapi_error, "Metric data type %d not supported", pm_type);
+            break;
+    }
+
+    return atom_value;
+}
+
 static VALUE rb_pmConvScale(VALUE self, VALUE pm_type_rb, VALUE value_rb, VALUE input_pmunits_rb, VALUE output_pmunits_rb) {
     int error;
     int pm_type = NUM2INT(pm_type_rb);
@@ -832,29 +865,7 @@ static VALUE rb_pmConvScale(VALUE self, VALUE pm_type_rb, VALUE value_rb, VALUE 
     pmUnits *input_pm_units = rb_pmapi_pmunits_ptr(input_pmunits_rb);
     pmUnits *output_pm_units = rb_pmapi_pmunits_ptr(output_pmunits_rb);
 
-    switch (pm_type) {
-        case PM_TYPE_32:
-            input_atom_value.l = NUM2INT(value_rb);
-            break;
-        case PM_TYPE_U32:
-            input_atom_value.ul = NUM2UINT(value_rb);
-            break;
-        case PM_TYPE_64:
-            input_atom_value.ll = NUM2LL(value_rb);
-            break;
-        case PM_TYPE_U64:
-            input_atom_value.ull = NUM2ULL(value_rb);
-            break;
-        case PM_TYPE_FLOAT:
-            input_atom_value.f = (float)NUM2DBL(value_rb);
-            break;
-        case PM_TYPE_DOUBLE:
-            input_atom_value.d = NUM2DBL(value_rb);
-            break;
-        default:
-            rb_raise(pcp_pmapi_error, "Metric data type %d not supported", pm_type);
-            break;
-    }
+    input_atom_value = rb_build_pmatomvalue(pm_type, value_rb);
 
     if((error = pmConvScale(pm_type, &input_atom_value, input_pm_units, &output_atom_value, output_pm_units)) < 0) {
         rb_pmapi_raise_error_from_pm_error_code(error);
@@ -1003,6 +1014,20 @@ static VALUE rb_pmUnitsStr(VALUE self, VALUE pmunits_rb) {
 
     return rb_tainted_str_new_cstr(result_buffer);
 }
+
+static VALUE rb_pmAtomStr(VALUE self, VALUE value_rb, VALUE pm_type_rb) {
+    char result_buffer[80];
+    pmAtomValue atom_value;
+    int pm_type = NUM2INT(pm_type_rb);
+
+
+    atom_value = rb_build_pmatomvalue(pm_type, value_rb);
+
+    pmAtomStr_r(&atom_value, pm_type, result_buffer, sizeof(result_buffer));
+
+    return rb_tainted_str_new_cstr(result_buffer);
+}
+
 
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
@@ -1238,5 +1263,6 @@ void Init_pcp_native() {
     rb_define_singleton_method(pcp_pmapi_class, "pmInDomStr", rb_pmInDomStr, 1);
     rb_define_singleton_method(pcp_pmapi_class, "pmTypeStr", rb_pmTypeStr, 1);
     rb_define_singleton_method(pcp_pmapi_class, "pmUnitsStr", rb_pmUnitsStr, 1);
+    rb_define_singleton_method(pcp_pmapi_class, "pmAtomStr", rb_pmAtomStr, 2);
 
 }
