@@ -1028,6 +1028,14 @@ static VALUE rb_pmAtomStr(VALUE self, VALUE value_rb, VALUE pm_type_rb) {
     return rb_tainted_str_new_cstr(result_buffer);
 }
 
+static VALUE rb_pmNumberStr(VALUE self, VALUE double_rb) {
+    char result_buffer[8];
+
+    pmNumberStr_r(NUM2DBL(double_rb), result_buffer, sizeof(result_buffer));
+
+    return rb_tainted_str_new_cstr(result_buffer);
+}
+
 
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
@@ -1264,5 +1272,6 @@ void Init_pcp_native() {
     rb_define_singleton_method(pcp_pmapi_class, "pmTypeStr", rb_pmTypeStr, 1);
     rb_define_singleton_method(pcp_pmapi_class, "pmUnitsStr", rb_pmUnitsStr, 1);
     rb_define_singleton_method(pcp_pmapi_class, "pmAtomStr", rb_pmAtomStr, 2);
+    rb_define_singleton_method(pcp_pmapi_class, "pmNumberStr", rb_pmNumberStr, 1);
 
 }

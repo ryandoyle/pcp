@@ -823,6 +823,14 @@ describe PCP::PMAPI do
         expect(described_class.pmAtomStr(-123, PCP::PMAPI::PM_TYPE_32)).to eq '-123'
       end
     end
+    describe '#pmNumberStr' do
+      it 'returns a string for a double for an instance of pmapi' do
+        expect(pmapi.pmNumberStr(1000.0)).to eq '  1.00K'
+      end
+      it 'returns a string for a double for the class method' do
+        expect(described_class.pmNumberStr(1000.0)).to eq '  1.00K'
+      end
+    end
 
   end
 
