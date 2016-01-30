@@ -655,6 +655,10 @@ static VALUE rb_pmFetch(VALUE self, VALUE pmids) {
 
     use_context(self);
 
+    if(TYPE(pmids) != T_ARRAY) {
+        rb_raise(rb_eArgError, "PMIDs must be an array");
+    }
+
     number_of_pmids = RARRAY_LENINT(pmids);
     pmidlist = malloc(sizeof(pmID*) * number_of_pmids);
 

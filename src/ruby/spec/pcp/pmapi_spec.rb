@@ -171,6 +171,7 @@ describe PCP::PMAPI do
   describe 'TODOS' do
     it 'replace all malloc() with ALLOC()'
     it 'check that memory is freed before we use rb_raise()'
+    it 'check all methods that take arrays arguments check they are arrays'
   end
 
   describe 'integration tests' do
@@ -537,6 +538,12 @@ describe PCP::PMAPI do
         end
         it 'raises an error when trying to get the vlist for unknown PMIDs' do
           expect{pmapi.pmFetch([123]).vset[0].vlist}.to raise_error PCP::PMAPI::NoAgentError
+        end
+      end
+
+      describe 'when called incorrectly' do
+        it 'should raise an argument error' do
+          expect{pmapi.pmFetch(123)}.to raise_error ArgumentError
         end
       end
 
