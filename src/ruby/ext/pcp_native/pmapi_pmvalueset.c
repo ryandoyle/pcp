@@ -158,6 +158,14 @@ VALUE rb_pmapi_pmvalueset_new(pmValueSet *pm_value_set) {
     /* Copy over pmValueSet and all pmValues */
     memcpy(pm_value_set_instance, pm_value_set, pm_value_set_memory_size);
 
+    /* vlist cannot be created lazily as the pointers to any pmValueBlocks will already be freed.
+     * We only create it if there is no error encoded into the numval. This allows exceptions to
+     * be raised when we are in an error state but only when we ask for the value. This allows
+     * a client to fetch multiple PMIDs (with one failing) and still accessing the valid PMID */
+    if(pm_value_set_instance->numval >= 0) {
+        get_vlist(instance);
+    }
+
     return instance;
 }
 

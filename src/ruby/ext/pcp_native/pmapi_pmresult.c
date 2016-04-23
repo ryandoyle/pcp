@@ -140,6 +140,9 @@ VALUE rb_pmapi_pmresult_new(pmResult *pm_result) {
     /* Copy over pmResult and pmValueSets */
     memcpy(pm_result_instance, pm_result, pm_result_memory_size);
 
+    /* We need to create the @vset upfront as pmFreeResult() ends up freeing the vsets */
+    rb_iv_set(instance, "@vset", create_vset(pm_result_instance));
+
     return instance;
 }
 
