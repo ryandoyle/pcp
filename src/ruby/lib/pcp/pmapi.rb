@@ -29,6 +29,8 @@ module PCP
     def_delegator self, :pmUnitsStr
     def_delegator self, :pmAtomStr
     def_delegator self, :pmNumberStr
+    def_delegator self, :pmEventFlagsStr
+    def_delegator self, :pmParseInterval
 
   end
 end

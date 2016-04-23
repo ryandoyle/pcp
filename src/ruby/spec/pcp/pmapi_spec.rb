@@ -7,7 +7,7 @@ RSpec::Matchers.define :have_the_value do |expected|
     vset_for_pmid = actual.vset.find { |v| v.pmid == @pmid }
 
     unless vset_for_pmid
-      @failure_message << "no vset with pmid #{@pmid} found "
+      @failure_message << "no vset with pmid #{@pmid} found #{actual.vset.inspect}"
       return false
     end
 
@@ -836,6 +836,15 @@ describe PCP::PMAPI do
       end
       it 'returns a string for a double for the class method' do
         expect(described_class.pmNumberStr(1000.0)).to eq '  1.00K'
+      end
+    end
+
+    describe '#pmParseInterval' do
+      it 'parses the time interval from the string' do
+        expect(described_class.pmParseInterval('10 days')).to eq Time.new(1970,01,11,10,00,0)
+      end
+      it 'raises an error if the time cannot be parsed' do
+        expect{described_class.pmParseInterval('10 somethings')}.to raise_error PCP::PMAPI::Error
       end
     end
 

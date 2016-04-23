@@ -1040,6 +1040,25 @@ static VALUE rb_pmNumberStr(VALUE self, VALUE double_rb) {
     return rb_tainted_str_new_cstr(result_buffer);
 }
 
+static VALUE rb_pmEventFlagsStr(VALUE self) {
+    rb_raise(rb_eNotImpError, "pmEventFlagsStr not supported");
+    return Qnil;
+}
+
+static VALUE rb_pmParseInterval(VALUE self, VALUE parse_string_rb) {
+    char *error_string;
+    struct timeval time;
+    VALUE error_string_rb;
+
+    if(pmParseInterval(StringValueCStr(parse_string_rb), &time, &error_string) < 0) {
+        error_string_rb = rb_str_new_cstr(error_string);
+        free(error_string);
+        rb_raise(pcp_pmapi_error, StringValueCStr(error_string_rb));
+        return Qnil;
+    }
+
+    return rb_time_new(time.tv_sec, time.tv_usec);
+}
 
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
@@ -1277,5 +1296,7 @@ void Init_pcp_native() {
     rb_define_singleton_method(pcp_pmapi_class, "pmUnitsStr", rb_pmUnitsStr, 1);
     rb_define_singleton_method(pcp_pmapi_class, "pmAtomStr", rb_pmAtomStr, 2);
     rb_define_singleton_method(pcp_pmapi_class, "pmNumberStr", rb_pmNumberStr, 1);
+    rb_define_singleton_method(pcp_pmapi_class, "pmEventFlagsStr", rb_pmEventFlagsStr, 0);
+    rb_define_singleton_method(pcp_pmapi_class, "pmParseInterval", rb_pmParseInterval, 1);
 
 }
