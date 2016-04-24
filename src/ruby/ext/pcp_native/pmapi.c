@@ -160,14 +160,14 @@ typedef struct {
     int pm_context;
 } PmApi_Context;
 
-static void deallocate(PmApi_Context *pmapi_context) {
+static void deallocate(void *pmapi_context_raw) {
+    PmApi_Context *pmapi_context = (PmApi_Context*) pmapi_context_raw;
     pmDestroyContext(pmapi_context->pm_context);
-    free(pmapi_context);
+    xfree(pmapi_context);
 }
 
 static VALUE allocate(VALUE self) {
-    /* TODO: Deal with malloc errors */
-    PmApi_Context *pmapi_context = malloc(sizeof(PmApi_Context));
+    PmApi_Context *pmapi_context = ALLOC(PmApi_Context);
     return Data_Wrap_Struct(self, 0, deallocate, pmapi_context);
 }
 
@@ -314,8 +314,8 @@ static VALUE rb_pmLookupName(VALUE self, VALUE names) {
     use_context(self);
 
     number_of_names = RARRAY_LENINT(names);
-    namelist = malloc(sizeof(char *) * number_of_names);
-    pmidlist = malloc(sizeof(pmID) * number_of_names);
+    namelist = ALLOC_N(char*, number_of_names);
+    pmidlist = ALLOC_N(pmID, number_of_names);
     result = rb_ary_new2(number_of_names);
 
     /* Populate name list */
@@ -325,6 +325,8 @@ static VALUE rb_pmLookupName(VALUE self, VALUE names) {
 
     error = pmLookupName(number_of_names, namelist, pmidlist);
     if(error < 0 ) {
+        xfree(namelist);
+        xfree(pmidlist);
         rb_pmapi_raise_error_from_pm_error_code(error);
     } else {
         /* Build up the array of hashes to return */
@@ -337,8 +339,8 @@ static VALUE rb_pmLookupName(VALUE self, VALUE names) {
         }
     }
 
-    free(namelist);
-    free(pmidlist);
+    xfree(namelist);
+    xfree(pmidlist);
 
     return result;
 }
@@ -604,7 +606,7 @@ static VALUE rb_pmDelProfile(VALUE self, VALUE indom, VALUE instance_identifiers
     number_of_instance_identifiers = RARRAY_LENINT(instance_identifiers);
 
     if(number_of_instance_identifiers > 0) {
-        instlist = malloc(sizeof(int *) * number_of_instance_identifiers);
+        instlist = ALLOC_N(int, number_of_instance_identifiers);
         for(i = 0; i < number_of_instance_identifiers; i++) {
             instlist[i] = NUM2INT(rb_ary_entry(instance_identifiers, i));
         }
@@ -615,7 +617,7 @@ static VALUE rb_pmDelProfile(VALUE self, VALUE indom, VALUE instance_identifiers
     }
 
     if(instlist) {
-        free(instlist);
+        xfree(instlist);
     }
 
     return Qnil;
@@ -630,18 +632,21 @@ static VALUE rb_pmAddProfile(VALUE self, VALUE indom, VALUE instance_identifiers
     number_of_instance_identifiers = RARRAY_LENINT(instance_identifiers);
 
     if(number_of_instance_identifiers > 0) {
-        instlist = malloc(sizeof(int *) * number_of_instance_identifiers);
+        instlist = ALLOC_N(int, number_of_instance_identifiers);
         for(i = 0; i < number_of_instance_identifiers; i++) {
             instlist[i] = NUM2INT(rb_ary_entry(instance_identifiers, i));
         }
     }
 
     if((error = pmAddProfile(NUM2UINT(indom), number_of_instance_identifiers, instlist)) < 0) {
+        if(instlist) {
+            xfree(instlist);
+        }
         rb_pmapi_raise_error_from_pm_error_code(error);
     }
 
     if(instlist) {
-        free(instlist);
+        xfree(instlist);
     }
 
     return Qnil;
@@ -660,14 +665,14 @@ static VALUE rb_pmFetch(VALUE self, VALUE pmids) {
     }
 
     number_of_pmids = RARRAY_LENINT(pmids);
-    pmidlist = malloc(sizeof(pmID*) * number_of_pmids);
+    pmidlist = ALLOC_N(pmID, number_of_pmids);
 
     for(i = 0; i < number_of_pmids; i++) {
         pmidlist[i] = NUM2UINT(rb_ary_entry(pmids, i));
     }
 
     if((error = pmFetch(number_of_pmids, pmidlist, &pm_fetch_result)) < 0) {
-        free(pmidlist);
+        xfree(pmidlist);
         rb_pmapi_raise_error_from_pm_error_code(error);
         return Qnil;
     }
@@ -676,7 +681,7 @@ static VALUE rb_pmFetch(VALUE self, VALUE pmids) {
     result = rb_pmapi_pmresult_new(pm_fetch_result);
 
     pmFreeResult(pm_fetch_result);
-    free(pmidlist);
+    xfree(pmidlist);
 
     return result;
 }
