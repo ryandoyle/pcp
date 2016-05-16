@@ -848,6 +848,62 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmParseTimeWindow' do
+      it 'should raise an error if less than 4 arguments are given' do
+        expect{described_class.pmParseTimeWindow(nil)}.to raise_error ArgumentError
+      end
+      it 'should raise an error if more than 6 arguments are given' do
+        expect{described_class.pmParseTimeWindow(nil, nil, nil, nil, nil, nil, nil)}.to raise_error ArgumentError
+      end
+      it 'should raise an error if the time cannot be parsed' do
+        expect{described_class.pmParseTimeWindow('not a time', nil, nil, nil)}.to raise_error PCP::PMAPI::Error
+      end
+      describe 'the start time' do
+        it 'is the calculated start time when used in an archive' do
+          archive_start_time = Time.new('1995-05-15')
+          archive_end_time = Time.new('2016-05-16')
+          time = described_class.pmParseTimeWindow('@ Mar 1996', nil, nil, nil, archive_start_time, archive_end_time)
+          expect(time[0]).to eq Time.new(1996, 3, 1)
+        end
+        it 'is a time class when not used with an archive' do
+          time = described_class.pmParseTimeWindow('@ Mar 1996', nil, nil, nil)
+          expect(time[0]).to be_kind_of Time
+        end
+      end
+      describe 'the end time' do
+        it 'is the correct end time when used in an archive' do
+          archive_start_time = Time.new('1995-05-15')
+          archive_end_time = Time.new('2016-05-16')
+          time = described_class.pmParseTimeWindow('@ Mar 1996', '+10 min', nil, nil, archive_start_time, archive_end_time)
+          expect(time[1]).to eq Time.new(1996, 3, 1, 0, 10)
+        end
+        it 'is the correct end time when not used with an archive' do
+          time = described_class.pmParseTimeWindow('@ Mar 1996', '+10 min', nil, nil)
+          expect(time[1]).to eq (time[0] + 600)
+        end
+      end
+      describe 'the offset' do
+        it 'is the correct offset of the start time when used in an archive' do
+          archive_start_time = Time.new('1995-05-15')
+          archive_end_time = Time.new('2016-05-16')
+          time = described_class.pmParseTimeWindow('@ Mar 1996', '+10 min', nil, '+2 min', archive_start_time, archive_end_time)
+          expect(time[2]).to eq Time.new(1996, 3, 1, 0, 2)
+        end
+        it 'is the correct offset when not used with an archive' do
+          time = described_class.pmParseTimeWindow('@ Mar 1996', '+10 min', nil, '+ 2 min ')
+          expect(time[2]).to eq (time[0] + 120)
+        end
+      end
+      describe 'parsing the alignment' do
+        it 'creates a start time with the correct alignment' do
+          archive_start_time = Time.new('1995-05-15')
+          archive_end_time = Time.new('2016-05-16')
+          time = described_class.pmParseTimeWindow('@ 1996-03-04 13:07:47', '+10 min', '1 min', nil, archive_start_time, archive_end_time)
+          expect(time[0]).to eq Time.new(1996, 3, 4, 13, 8)
+        end
+      end
+    end
+
   end
 
 end

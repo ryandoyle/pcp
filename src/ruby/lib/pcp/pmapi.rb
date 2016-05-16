@@ -31,6 +31,7 @@ module PCP
     def_delegator self, :pmNumberStr
     def_delegator self, :pmEventFlagsStr
     def_delegator self, :pmParseInterval
+    def_delegator self, :pmParseTimeWindow
 
   end
 end

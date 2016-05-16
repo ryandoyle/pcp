@@ -1065,6 +1065,82 @@ static VALUE rb_pmParseInterval(VALUE self, VALUE parse_string_rb) {
     return rb_time_new(time.tv_sec, time.tv_usec);
 }
 
+static VALUE rb_pmParseTimeWindow(int argc, VALUE *argv, VALUE self) {
+    int error;
+
+    VALUE start_time_str_rb;
+    VALUE end_time_str_rb;
+    VALUE align_str_rb;
+    VALUE offset_str_rb;
+    VALUE log_start_rb;
+    VALUE log_end_rb;
+    VALUE error_str_rb;
+
+    struct timeval log_start;
+    struct timeval log_end;
+
+    VALUE result_array;
+    struct timeval result_start_time;
+    struct timeval result_end_time;
+    struct timeval result_offset_time;
+
+    char *error_message = NULL;
+
+
+    /* log_start and log_end are only relevant for pm log mode */
+    rb_scan_args(argc, argv, "42", &start_time_str_rb, &end_time_str_rb, &align_str_rb, &offset_str_rb, &log_start_rb, &log_end_rb);
+
+    /* start of log or current time if not using an archive */
+    if(TYPE(log_start_rb) != T_NIL) {
+        log_start = rb_time_timeval(log_start_rb);
+    } else {
+        gettimeofday(&log_start, NULL);
+    }
+    /* end of log or tv_sec == INT_MAX */
+    if(TYPE(log_end_rb) != T_NIL) {
+        log_end = rb_time_timeval(log_end_rb);
+    } else {
+        log_end.tv_sec = INT_MAX;
+    }
+
+    error = pmParseTimeWindow(
+            TYPE(start_time_str_rb) == T_NIL ? NULL : StringValueCStr(start_time_str_rb),
+            TYPE(end_time_str_rb) == T_NIL ? NULL : StringValueCStr(end_time_str_rb),
+            TYPE(align_str_rb) == T_NIL ? NULL : StringValueCStr(align_str_rb),
+            TYPE(offset_str_rb) == T_NIL ? NULL : StringValueCStr(offset_str_rb),
+            &log_start,
+            &log_end,
+            &result_start_time,
+            &result_end_time,
+            &result_offset_time,
+            &error_message);
+
+    if(error == 0){
+        /* Its possible to parse the time but with a warning. Printing to stderr is probably the best thing to do */
+        fprintf(stderr, "Warning: %s\n", error_message);
+        /* According to the man page, error_message is a static buffer but it does call other functions that malloc */
+        if(error_message) {
+            free(error_message);
+        }
+    }
+    if(error == -1){
+        /* Error */
+        error_str_rb = rb_tainted_str_new_cstr(error_message);
+        if(error_message) {
+            free(error_message);
+        }
+        rb_raise(pcp_pmapi_error, StringValueCStr(error_str_rb));
+    }
+
+    result_array = rb_ary_new2(3);
+    rb_ary_push(result_array, rb_time_new(result_start_time.tv_sec, result_start_time.tv_usec));
+    rb_ary_push(result_array, rb_time_new(result_end_time.tv_sec, result_end_time.tv_usec));
+    rb_ary_push(result_array, rb_time_new(result_offset_time.tv_sec, result_offset_time.tv_usec));
+
+    return result_array;
+
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1303,5 +1379,6 @@ void Init_pcp_native() {
     rb_define_singleton_method(pcp_pmapi_class, "pmNumberStr", rb_pmNumberStr, 1);
     rb_define_singleton_method(pcp_pmapi_class, "pmEventFlagsStr", rb_pmEventFlagsStr, 0);
     rb_define_singleton_method(pcp_pmapi_class, "pmParseInterval", rb_pmParseInterval, 1);
+    rb_define_singleton_method(pcp_pmapi_class, "pmParseTimeWindow", rb_pmParseTimeWindow, -1);
 
 }
