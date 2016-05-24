@@ -936,6 +936,12 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmCtime' do
+      it 'returns a string representing the time' do
+        expect(pmapi_archive.pmCtime(123456)).to eq "Fri Jan  2 05:17:36 1970\n"
+      end
+    end
+
   end
 
 end

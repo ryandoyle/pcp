@@ -1190,6 +1190,17 @@ static VALUE rb_pmUseZone(VALUE self, VALUE tz_handle) {
     return Qnil;
 }
 
+static VALUE rb_pmCtime(VALUE self, VALUE seconds_since_epoc_rb) {
+    char string_buffer[28];
+    time_t seconds_since_epoc;
+    seconds_since_epoc = (time_t)NUM2LONG(seconds_since_epoc_rb);
+
+    use_context(self);
+    pmCtime(&seconds_since_epoc, string_buffer);
+
+    return rb_tainted_str_new_cstr(string_buffer);
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1433,5 +1444,6 @@ void Init_pcp_native() {
     rb_define_method(pcp_pmapi_class, "pmNewContextZone", rb_pmNewContextZone, 0);
     rb_define_method(pcp_pmapi_class, "pmNewZone", rb_pmNewZone, 1);
     rb_define_method(pcp_pmapi_class, "pmUseZone", rb_pmUseZone, 1);
+    rb_define_method(pcp_pmapi_class, "pmCtime", rb_pmCtime, 1);
 
 }
