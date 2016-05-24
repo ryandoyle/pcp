@@ -17,3 +17,14 @@ RSpec::Matchers.define :be_as_close_as_possible_to do |expected|
     "float #{actual} is greater than #{FLOAT_EPSILON} +/- from #{expected}"
   end
 end
+
+RSpec::Matchers.define :be_in_timezone do |expected|
+  match do |actual|
+    actual.pmWhichZone == expected
+  end
+
+  failure_message do |actual|
+    "expected pmapi to be in the timezone '#{expected}' but got '#{actual.pmWhichZone}'"
+  end
+
+end

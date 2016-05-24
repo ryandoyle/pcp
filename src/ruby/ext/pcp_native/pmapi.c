@@ -1141,6 +1141,55 @@ static VALUE rb_pmParseTimeWindow(int argc, VALUE *argv, VALUE self) {
 
 }
 
+static VALUE rb_pmWhichZone(VALUE self) {
+    char *timezone;
+    int error;
+
+    use_context(self);
+
+    if((error = pmWhichZone(&timezone)) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+        return Qnil;
+    }
+
+    return rb_tainted_str_new_cstr(timezone);
+}
+
+static VALUE rb_pmNewContextZone(VALUE self) {
+    int error;
+
+    use_context(self);
+
+    if((error = pmNewContextZone()) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+    }
+    return Qnil;
+}
+
+static VALUE rb_pmNewZone(VALUE self, VALUE timezone_str) {
+    int error_or_tz_handle;
+
+    use_context(self);
+
+    if((error_or_tz_handle = pmNewZone(StringValueCStr(timezone_str))) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error_or_tz_handle);
+        return Qnil;
+    }
+
+    return INT2NUM(error_or_tz_handle);
+}
+
+static VALUE rb_pmUseZone(VALUE self, VALUE tz_handle) {
+    int error;
+
+    use_context(self);
+
+    if((error = pmUseZone(NUM2INT(tz_handle))) < 0) {
+        rb_pmapi_raise_error_from_pm_error_code(error);
+    }
+    return Qnil;
+}
+
 void Init_pcp_native() {
     pcp_module = rb_define_module("PCP");
     pcp_pmapi_class = rb_define_class_under(pcp_module, "PMAPI", rb_cObject);
@@ -1380,5 +1429,9 @@ void Init_pcp_native() {
     rb_define_singleton_method(pcp_pmapi_class, "pmEventFlagsStr", rb_pmEventFlagsStr, 0);
     rb_define_singleton_method(pcp_pmapi_class, "pmParseInterval", rb_pmParseInterval, 1);
     rb_define_singleton_method(pcp_pmapi_class, "pmParseTimeWindow", rb_pmParseTimeWindow, -1);
+    rb_define_method(pcp_pmapi_class, "pmWhichZone", rb_pmWhichZone, 0);
+    rb_define_method(pcp_pmapi_class, "pmNewContextZone", rb_pmNewContextZone, 0);
+    rb_define_method(pcp_pmapi_class, "pmNewZone", rb_pmNewZone, 1);
+    rb_define_method(pcp_pmapi_class, "pmUseZone", rb_pmUseZone, 1);
 
 }

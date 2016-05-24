@@ -904,6 +904,38 @@ describe PCP::PMAPI do
       end
     end
 
+    describe '#pmWhichZone' do
+      it 'raises an error if the time context is not set' do
+        expect{pmapi.pmWhichZone}.to raise_error PCP::PMAPI::Error
+      end
+      it 'returns the timezone set with the context' do
+        tz = pmapi.pmNewZone('EST+5')
+        pmapi.pmUseZone(tz)
+        expect(pmapi.pmWhichZone).to eq 'EST+5'
+      end
+    end
+
+    describe '#pmNewContextZone' do
+      it 'uses the timezone from the pmapi context' do
+        pmapi_archive.pmNewContextZone
+        expect(pmapi_archive).to be_in_timezone 'EST-11'
+      end
+    end
+
+    describe '#pmNewZone' do
+      it 'returns a handle for the new timezone' do
+        expect(pmapi.pmNewZone('EST+5')).to be_kind_of Fixnum
+      end
+    end
+
+    describe '#pmUseZone' do
+      it 'sets the zone from a timezone handle' do
+        tz = pmapi.pmNewZone('EST+5')
+        pmapi.pmUseZone(tz)
+        expect(pmapi).to be_in_timezone 'EST+5'
+      end
+    end
+
   end
 
 end
