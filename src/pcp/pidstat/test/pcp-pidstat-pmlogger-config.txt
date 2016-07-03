@@ -1,0 +1,7 @@
+log mandatory on 1 sec {
+	pmda.uname
+	hinv.ncpu
+	proc
+	kernel
+    mem
+}

@@ -1,5 +1,6 @@
+
 #
-# Copyright (c) 2014-2016 Red Hat.
+# Copyright (c) 2014 Red Hat.
 # Copyright (c) 2000,2004 Silicon Graphics, Inc.  All Rights Reserved.
 # 
 # This program is free software; you can redistribute it and/or modify it
@@ -13,38 +14,29 @@
 # for more details.
 # 
 
-TOPDIR = ../..
+TOPDIR = ../../..
 include $(TOPDIR)/src/include/builddefs
 
-SUBDIRS = \
-	atop \
-	collectl \
-	dmcache \
-	free \
-	iostat \
-	numastat \
-	python \
-	shping \
-	summary \
-	uptime \
-	verify \
-	vmstat \
-        ipcs
+TARGET = pcp-pidstat
+MAN_SECTION = 1
+MAN_PAGES = $(TARGET).$(MAN_SECTION)
+MAN_DEST = $(PCP_MAN_DIR)/man$(MAN_SECTION)
 
-default :: default_pcp
+default: $(TARGET).py $(MAN_PAGES)
 
-default_pcp : $(SUBDIRS)
-	$(SUBDIRS_MAKERULE)
+include $(BUILDRULES)
 
-install :: install_pcp
+install: default
+ifeq "$(HAVE_PYTHON)" "true"
+	$(INSTALL) -m 755 $(TARGET).py $(PCP_BINADM_DIR)/$(TARGET)
+	@$(INSTALL_MAN)
+endif
 
-install_pcp : $(SUBDIRS)
-	$(INSTALL) -m 755 pcp.sh $(PCP_BIN_DIR)/pcp$(SHELLSUFFIX)
-	$(SUBDIRS_MAKERULE)
+default_pcp : default
+
+install_pcp : install
 
 check :: check_pcp
 
-check_pcp : pidstat
-	$(SUBDIRS_MAKERULE)
-
-include $(BUILDRULES)
+check_pcp:
+	python -m unittest discover -s test -p '*_test.py'
